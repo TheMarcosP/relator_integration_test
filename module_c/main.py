@@ -15,6 +15,12 @@ except KeyError as e:
 def finalize():
     return {"result": "Finalized by Module C"}
 
+@app.post("/comment")
+def comment(comment: dict):
+    print(f"Received comment: {comment}")
+    # Here you can process the comment as needed
+    return {"status": "Comment received", "comment": comment}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("module_c.main:app", host="0.0.0.0", port=MODULE_C_PORT, reload=True) 

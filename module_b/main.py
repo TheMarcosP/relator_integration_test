@@ -17,6 +17,12 @@ def process():
     response = requests.get(f"{MODULE_C_URL}/finalize")
     return {"from_c": response.json()}
 
+@app.post("/event")
+def event(event: dict):
+    print(f"Received event: {event.keys()}")
+    response_tts = requests.post(f"{MODULE_C_URL}/comment", json={'keys': event.keys()})
+    return {"status": "Event received"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("module_b.main:app", host="0.0.0.0", port=MODULE_B_PORT, reload=True) 
