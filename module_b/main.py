@@ -19,8 +19,9 @@ def process():
 
 @app.post("/event")
 def event(event: dict):
-    print(f"Received event: {event.keys()}")
-    response_tts = requests.post(f"{MODULE_C_URL}/comment", json={'keys': event.keys()})
+    print(f"Received event: {event["step"]}")
+
+    response_tts = requests.post(f"{MODULE_C_URL}/comment", json={'keys': event["step"]})
     return {"status": "Event received"}
 
 if __name__ == "__main__":
