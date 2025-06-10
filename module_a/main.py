@@ -12,10 +12,10 @@ try:
 except KeyError as e:
     raise RuntimeError(f"Missing required environment variable: {e.args[0]}")
 
-@app.get("/start")
-def start():
+@app.get("/test_a_module")
+def test_a_module():
     print("Starting module A")
-    response = requests.get(f"{MODULE_B_URL}/process")
+    response = requests.get(f"{MODULE_B_URL}/test_b_module")
     return {"from_b": response.json()}
 
 if __name__ == "__main__":

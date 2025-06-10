@@ -11,8 +11,8 @@ try:
 except KeyError as e:
     raise RuntimeError(f"Missing required environment variable: {e.args[0]}")
 
-@app.get("/finalize")
-def finalize():
+@app.get("/test_c_module")
+def test_c_module():
     return {"result": "Finalized by Module C"}
 
 @app.post("/comment")

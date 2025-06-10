@@ -12,8 +12,8 @@ try:
 except KeyError as e:
     raise RuntimeError(f"Missing required environment variable: {e.args[0]}")
 
-@app.get("/process")
-def process():
+@app.get("/test_b_module")
+def test_b_module():
     response = requests.get(f"{MODULE_C_URL}/finalize")
     return {"from_c": response.json()}
 
