@@ -36,7 +36,7 @@ class TextToSpeech:
         })
         self.last_processed = result
         
-        logger.debug(f"Processed text: {result}")
+        logger.debug(f"Processed text: {str(result)}")
         return result
 
     def validate_text(self, input_string):

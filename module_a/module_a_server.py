@@ -6,12 +6,12 @@ import os
 import threading
 import time
 # Add the parent directory to the Python path so 'proto' can be imported
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import proto.data_pb2 as data_pb2
 import proto.data_pb2_grpc as data_grpc
 from scripts.logging_config import setup_logger
 from scripts.utils import get_env_var
-from event_extractor import EventExtractor
+from module_a.event_extractor import EventExtractor
 
 # Setup environment variables
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "localhost:50051")

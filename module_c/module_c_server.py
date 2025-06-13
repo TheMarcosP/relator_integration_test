@@ -1,15 +1,13 @@
 import grpc
 from concurrent import futures
-import sys
-import os
 import threading
 # Add the parent directory to the Python path so 'proto' can be imported
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import proto.data_pb2 as data_pb2
 import proto.data_pb2_grpc as data_grpc
 from scripts.logging_config import setup_logger
 from scripts.utils import get_env_var
-from text_to_speech import TextToSpeech
+from module_c.text_to_speech import TextToSpeech
 
 # Setup environment variables
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "localhost:50052")
@@ -17,14 +15,14 @@ MODULE_A_HOST = get_env_var("MODULE_A_HOST", "localhost:50053")
 
 # Setup logger
 logger = setup_logger('module_c')
-logger.debug(f"Initializing Module C with environment variables:\nMODULE_C_HOST: {MODULE_C_HOST}\nMODULE_A_HOST: {MODULE_A_HOST}")
+logger.debug(f"Initializing Module C with environment variables: MODULE_C_HOST: {MODULE_C_HOST}, MODULE_A_HOST: {MODULE_A_HOST}")
 
 # Create a single instance of TextToSpeech
 text_to_speech = TextToSpeech()
 
 class ModuleCServicer(data_grpc.ModuleCServicer):
     def Finalize(self, request, context):
-        logger.debug(f"Received string from B: {request.data}")
+        logger.debug(f"Received string from B: {str(request.data)}")
         logger.info(f"Got string from B")
         # First acknowledge receipt
         ack = data_pb2.Ack(success=True, message="String received")
@@ -34,7 +32,6 @@ class ModuleCServicer(data_grpc.ModuleCServicer):
             try:
                 # Process the text
                 final_string = text_to_speech.process_text(request.data)
-                logger.debug(f"Waiting 3 seconds before sending to A")
                 # Send to A
                 logger.debug(f"Connecting to Module A at {MODULE_A_HOST}")
                 with grpc.insecure_channel(MODULE_A_HOST) as channel:

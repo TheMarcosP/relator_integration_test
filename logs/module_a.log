@@ -1,67 +1,67 @@
-2025-06-13 13:24:11,457 - module_a - DEBUG - Initializing Module A with environment variables: MODULE_B_HOST: localhost:50051, MODULE_A_HOST: localhost:50053
-2025-06-13 13:24:11,457 - module_a - DEBUG - EventExtractor initialized
-2025-06-13 13:24:11,457 - module_a - DEBUG - Starting client connection to Module B
-2025-06-13 13:24:11,465 - module_a - DEBUG - Extracted event 1: {'key_1': 'value_1', 'timestamp': '1749831851.4657993', 'status': 'active', 'source': 'Module A', 'sequence': '1', 'runtime': '0.008352279663085938', 'time_since_last': '0.0'}
-2025-06-13 13:24:11,466 - module_a - DEBUG - Preparing to send dictionary: {'key_1': 'value_1', 'timestamp': '1749831851.4657993', 'status': 'active', 'source': 'Module A', 'sequence': '1', 'runtime': '0.008352279663085938', 'time_since_last': '0.0'}
-2025-06-13 13:24:11,466 - module_a - INFO - Sending dictionary 1
-2025-06-13 13:24:11,470 - module_a - DEBUG - Server initialized and listening on localhost:50053
-2025-06-13 13:24:11,470 - module_a - INFO - Server listening on localhost:50053
-2025-06-13 13:24:11,470 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:11,470 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:11,482 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 1 | source: Module A | runtime: 0.008352279663085938 | timestamp: 1749831851.4657993 | key_1: value_1 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831851.4695575 | processing_sequence: 1))
-2025-06-13 13:24:12,472 - module_a - DEBUG - Extracted event 2: {'key_2': 'value_2', 'timestamp': '1749831852.4719565', 'status': 'active', 'source': 'Module A', 'sequence': '2', 'runtime': '1.014503002166748', 'time_since_last': '0.0'}
-2025-06-13 13:24:12,472 - module_a - DEBUG - Preparing to send dictionary: {'key_2': 'value_2', 'timestamp': '1749831852.4719565', 'status': 'active', 'source': 'Module A', 'sequence': '2', 'runtime': '1.014503002166748', 'time_since_last': '0.0'}
-2025-06-13 13:24:12,472 - module_a - INFO - Sending dictionary 2
-2025-06-13 13:24:12,475 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:12,475 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:12,480 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 2 | source: Module A | key_2: value_2 | runtime: 1.014503002166748 | timestamp: 1749831852.4719565 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.4742315 | processing_sequence: 2))
-2025-06-13 13:24:12,295 - module_a - DEBUG - Extracted event 3: {'key_3': 'value_3', 'timestamp': '1749831852.2953806', 'status': 'active', 'source': 'Module A', 'sequence': '3', 'runtime': '0.8379242420196533', 'time_since_last': '0.0'}
-2025-06-13 13:24:12,295 - module_a - DEBUG - Preparing to send dictionary: {'key_3': 'value_3', 'timestamp': '1749831852.2953806', 'status': 'active', 'source': 'Module A', 'sequence': '3', 'runtime': '0.8379242420196533', 'time_since_last': '0.0'}
-2025-06-13 13:24:12,295 - module_a - INFO - Sending dictionary 3
-2025-06-13 13:24:12,298 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:12,298 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:12,307 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 3 | runtime: 0.8379242420196533 | source: Module A | key_3: value_3 | timestamp: 1749831852.2953806 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.2979295 | processing_sequence: 3))
-2025-06-13 13:24:13,299 - module_a - DEBUG - Extracted event 4: {'key_4': 'value_4', 'timestamp': '1749831853.2997894', 'status': 'active', 'source': 'Module A', 'sequence': '4', 'runtime': '1.8423359394073486', 'time_since_last': '0.0'}
-2025-06-13 13:24:13,300 - module_a - DEBUG - Preparing to send dictionary: {'key_4': 'value_4', 'timestamp': '1749831853.2997894', 'status': 'active', 'source': 'Module A', 'sequence': '4', 'runtime': '1.8423359394073486', 'time_since_last': '0.0'}
-2025-06-13 13:24:13,300 - module_a - INFO - Sending dictionary 4
-2025-06-13 13:24:13,302 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:13,302 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:13,307 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 4 | source: Module A | runtime: 1.8423359394073486 | timestamp: 1749831853.2997894 | status: active | key_4: value_4 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831853.3017068 | processing_sequence: 4))
-2025-06-13 13:24:14,304 - module_a - DEBUG - Extracted event 5: {'key_5': 'value_5', 'timestamp': '1749831854.3039908', 'status': 'active', 'source': 'Module A', 'sequence': '5', 'runtime': '2.846536159515381', 'time_since_last': '0.0'}
-2025-06-13 13:24:14,304 - module_a - DEBUG - Preparing to send dictionary: {'key_5': 'value_5', 'timestamp': '1749831854.3039908', 'status': 'active', 'source': 'Module A', 'sequence': '5', 'runtime': '2.846536159515381', 'time_since_last': '0.0'}
-2025-06-13 13:24:14,304 - module_a - INFO - Sending dictionary 5
-2025-06-13 13:24:14,305 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:14,306 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:14,314 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 5 | source: Module A | key_5: value_5 | runtime: 2.846536159515381 | timestamp: 1749831854.3039908 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831854.3054543 | processing_sequence: 5))
-2025-06-13 13:24:15,308 - module_a - DEBUG - Extracted event 6: {'key_6': 'value_6', 'timestamp': '1749831855.3079383', 'status': 'active', 'source': 'Module A', 'sequence': '6', 'runtime': '3.850482940673828', 'time_since_last': '0.0'}
-2025-06-13 13:24:15,308 - module_a - DEBUG - Preparing to send dictionary: {'key_6': 'value_6', 'timestamp': '1749831855.3079383', 'status': 'active', 'source': 'Module A', 'sequence': '6', 'runtime': '3.850482940673828', 'time_since_last': '0.0'}
-2025-06-13 13:24:15,308 - module_a - INFO - Sending dictionary 6
-2025-06-13 13:24:15,311 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:15,311 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:15,318 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 6 | source: Module A | key_6: value_6 | runtime: 3.850482940673828 | timestamp: 1749831855.3079383 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831855.3103118 | processing_sequence: 6))
-2025-06-13 13:24:16,313 - module_a - DEBUG - Extracted event 7: {'key_7': 'value_7', 'timestamp': '1749831856.3129928', 'status': 'active', 'source': 'Module A', 'sequence': '7', 'runtime': '4.855538606643677', 'time_since_last': '0.0'}
-2025-06-13 13:24:16,313 - module_a - DEBUG - Preparing to send dictionary: {'key_7': 'value_7', 'timestamp': '1749831856.3129928', 'status': 'active', 'source': 'Module A', 'sequence': '7', 'runtime': '4.855538606643677', 'time_since_last': '0.0'}
-2025-06-13 13:24:16,313 - module_a - INFO - Sending dictionary 7
-2025-06-13 13:24:16,316 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:16,316 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:16,326 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 7 | source: Module A | runtime: 4.855538606643677 | timestamp: 1749831856.3129928 | key_7: value_7 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831856.3160243 | processing_sequence: 7))
-2025-06-13 13:24:17,319 - module_a - DEBUG - Extracted event 8: {'key_8': 'value_8', 'timestamp': '1749831857.318922', 'status': 'active', 'source': 'Module A', 'sequence': '8', 'runtime': '5.861465692520142', 'time_since_last': '0.0'}
-2025-06-13 13:24:17,319 - module_a - DEBUG - Preparing to send dictionary: {'key_8': 'value_8', 'timestamp': '1749831857.318922', 'status': 'active', 'source': 'Module A', 'sequence': '8', 'runtime': '5.861465692520142', 'time_since_last': '0.0'}
-2025-06-13 13:24:17,319 - module_a - INFO - Sending dictionary 8
-2025-06-13 13:24:17,323 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:17,323 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:17,333 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 8 | source: Module A | runtime: 5.861465692520142 | timestamp: 1749831857.318922 | status: active | key_8: value_8 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831857.3219454 | processing_sequence: 8))
-2025-06-13 13:24:18,325 - module_a - DEBUG - Extracted event 9: {'key_9': 'value_9', 'timestamp': '1749831858.3253386', 'status': 'active', 'source': 'Module A', 'sequence': '9', 'runtime': '6.867883205413818', 'time_since_last': '0.0'}
-2025-06-13 13:24:18,325 - module_a - DEBUG - Preparing to send dictionary: {'key_9': 'value_9', 'timestamp': '1749831858.3253386', 'status': 'active', 'source': 'Module A', 'sequence': '9', 'runtime': '6.867883205413818', 'time_since_last': '0.0'}
-2025-06-13 13:24:18,325 - module_a - INFO - Sending dictionary 9
-2025-06-13 13:24:18,327 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:18,327 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:18,332 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 9 | source: Module A | runtime: 6.867883205413818 | timestamp: 1749831858.3253386 | status: active | key_9: value_9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831858.3269005 | processing_sequence: 9))
-2025-06-13 13:24:19,329 - module_a - DEBUG - Extracted event 10: {'key_10': 'value_10', 'timestamp': '1749831859.3292694', 'status': 'active', 'source': 'Module A', 'sequence': '10', 'runtime': '7.8718156814575195', 'time_since_last': '0.0'}
-2025-06-13 13:24:19,329 - module_a - DEBUG - Preparing to send dictionary: {'key_10': 'value_10', 'timestamp': '1749831859.3292694', 'status': 'active', 'source': 'Module A', 'sequence': '10', 'runtime': '7.8718156814575195', 'time_since_last': '0.0'}
-2025-06-13 13:24:19,329 - module_a - INFO - Sending dictionary 10
-2025-06-13 13:24:19,332 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
-2025-06-13 13:24:19,333 - module_a - INFO - Got acknowledgment from B
-2025-06-13 13:24:19,338 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (sequence: 10 | timestamp: 1749831859.3292694 | key_10: value_10 | runtime: 7.8718156814575195 | source: Module A | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831859.3322308 | processing_sequence: 10))
-2025-06-13 13:24:20,336 - module_a - DEBUG - Client finished sending messages. Stats: {'total_events': 10, 'runtime': 8.879403829574585, 'average_interval': 0.0}
-2025-06-13 13:24:20,337 - module_a - INFO - Finished sending 10 messages. Server remains active to receive responses.
+2025-06-13 18:25:03,555 - module_a - DEBUG - Initializing Module A with environment variables: MODULE_B_HOST: localhost:50051, MODULE_A_HOST: localhost:50053
+2025-06-13 18:25:03,555 - module_a - DEBUG - EventExtractor initialized
+2025-06-13 18:25:03,555 - module_a - DEBUG - Starting client connection to Module B
+2025-06-13 18:25:03,564 - module_a - DEBUG - Extracted event 1: {'key_1': 'value_1', 'timestamp': '1749849903.5648952', 'status': 'active', 'source': 'Module A', 'sequence': '1', 'runtime': '0.009484529495239258', 'time_since_last': '0.0'}
+2025-06-13 18:25:03,565 - module_a - DEBUG - Preparing to send events: {'key_1': 'value_1', 'timestamp': '1749849903.5648952', 'status': 'active', 'source': 'Module A', 'sequence': '1', 'runtime': '0.009484529495239258', 'time_since_last': '0.0'}
+2025-06-13 18:25:03,565 - module_a - INFO - Sending events 1
+2025-06-13 18:25:03,568 - module_a - DEBUG - Server initialized and listening on localhost:50053
+2025-06-13 18:25:03,568 - module_a - INFO - Server listening on localhost:50053
+2025-06-13 18:25:03,568 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:03,569 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:03,578 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849903.5648952 | status: active | runtime: 0.009484529495239258 | source: Module A | key_1: value_1 | sequence: 1 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849903.568298 | processing_sequence: 1))
+2025-06-13 18:25:04,572 - module_a - DEBUG - Extracted event 2: {'key_2': 'value_2', 'timestamp': '1749849904.5724852', 'status': 'active', 'source': 'Module A', 'sequence': '2', 'runtime': '1.0170626640319824', 'time_since_last': '0.0'}
+2025-06-13 18:25:04,572 - module_a - DEBUG - Preparing to send events: {'key_2': 'value_2', 'timestamp': '1749849904.5724852', 'status': 'active', 'source': 'Module A', 'sequence': '2', 'runtime': '1.0170626640319824', 'time_since_last': '0.0'}
+2025-06-13 18:25:04,573 - module_a - INFO - Sending events 2
+2025-06-13 18:25:04,580 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:04,581 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:04,588 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849904.5724852 | status: active | key_2: value_2 | runtime: 1.0170626640319824 | source: Module A | sequence: 2 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849904.5796902 | processing_sequence: 2))
+2025-06-13 18:25:05,591 - module_a - DEBUG - Extracted event 3: {'key_3': 'value_3', 'timestamp': '1749849905.590985', 'status': 'active', 'source': 'Module A', 'sequence': '3', 'runtime': '2.0355684757232666', 'time_since_last': '0.0'}
+2025-06-13 18:25:05,591 - module_a - DEBUG - Preparing to send events: {'key_3': 'value_3', 'timestamp': '1749849905.590985', 'status': 'active', 'source': 'Module A', 'sequence': '3', 'runtime': '2.0355684757232666', 'time_since_last': '0.0'}
+2025-06-13 18:25:05,591 - module_a - INFO - Sending events 3
+2025-06-13 18:25:05,594 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:05,594 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:05,624 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849905.590985 | time_since_last: 0.0 | status: active | runtime: 2.0355684757232666 | source: Module A | sequence: 3 | key_3: value_3 | processed_by: Module B | processing_time: 1749849905.59339 | processing_sequence: 3))
+2025-06-13 18:25:06,596 - module_a - DEBUG - Extracted event 4: {'key_4': 'value_4', 'timestamp': '1749849906.5963004', 'status': 'active', 'source': 'Module A', 'sequence': '4', 'runtime': '3.0408785343170166', 'time_since_last': '0.0'}
+2025-06-13 18:25:06,597 - module_a - DEBUG - Preparing to send events: {'key_4': 'value_4', 'timestamp': '1749849906.5963004', 'status': 'active', 'source': 'Module A', 'sequence': '4', 'runtime': '3.0408785343170166', 'time_since_last': '0.0'}
+2025-06-13 18:25:06,597 - module_a - INFO - Sending events 4
+2025-06-13 18:25:06,601 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:06,601 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:06,611 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849906.5963004 | key_4: value_4 | status: active | runtime: 3.0408785343170166 | source: Module A | sequence: 4 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849906.6004777 | processing_sequence: 4))
+2025-06-13 18:25:07,603 - module_a - DEBUG - Extracted event 5: {'key_5': 'value_5', 'timestamp': '1749849907.6037946', 'status': 'active', 'source': 'Module A', 'sequence': '5', 'runtime': '4.048359155654907', 'time_since_last': '0.0'}
+2025-06-13 18:25:07,604 - module_a - DEBUG - Preparing to send events: {'key_5': 'value_5', 'timestamp': '1749849907.6037946', 'status': 'active', 'source': 'Module A', 'sequence': '5', 'runtime': '4.048359155654907', 'time_since_last': '0.0'}
+2025-06-13 18:25:07,604 - module_a - INFO - Sending events 5
+2025-06-13 18:25:07,610 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:07,610 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:07,617 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (key_5: value_5 | timestamp: 1749849907.6037946 | status: active | runtime: 4.048359155654907 | source: Module A | sequence: 5 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849907.6085129 | processing_sequence: 5))
+2025-06-13 18:25:08,612 - module_a - DEBUG - Extracted event 6: {'key_6': 'value_6', 'timestamp': '1749849908.6124475', 'status': 'active', 'source': 'Module A', 'sequence': '6', 'runtime': '5.057024240493774', 'time_since_last': '0.0'}
+2025-06-13 18:25:08,613 - module_a - DEBUG - Preparing to send events: {'key_6': 'value_6', 'timestamp': '1749849908.6124475', 'status': 'active', 'source': 'Module A', 'sequence': '6', 'runtime': '5.057024240493774', 'time_since_last': '0.0'}
+2025-06-13 18:25:08,613 - module_a - INFO - Sending events 6
+2025-06-13 18:25:08,617 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:08,618 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:08,623 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849908.6124475 | status: active | runtime: 5.057024240493774 | source: Module A | key_6: value_6 | sequence: 6 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849908.6165013 | processing_sequence: 6))
+2025-06-13 18:25:09,619 - module_a - DEBUG - Extracted event 7: {'key_7': 'value_7', 'timestamp': '1749849909.6195111', 'status': 'active', 'source': 'Module A', 'sequence': '7', 'runtime': '6.0640928745269775', 'time_since_last': '0.0'}
+2025-06-13 18:25:09,619 - module_a - DEBUG - Preparing to send events: {'key_7': 'value_7', 'timestamp': '1749849909.6195111', 'status': 'active', 'source': 'Module A', 'sequence': '7', 'runtime': '6.0640928745269775', 'time_since_last': '0.0'}
+2025-06-13 18:25:09,619 - module_a - INFO - Sending events 7
+2025-06-13 18:25:09,624 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:09,624 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:09,631 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849909.6195111 | status: active | runtime: 6.0640928745269775 | key_7: value_7 | source: Module A | sequence: 7 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849909.6220057 | processing_sequence: 7))
+2025-06-13 18:25:10,626 - module_a - DEBUG - Extracted event 8: {'key_8': 'value_8', 'timestamp': '1749849910.6266692', 'status': 'active', 'source': 'Module A', 'sequence': '8', 'runtime': '7.071242809295654', 'time_since_last': '0.0'}
+2025-06-13 18:25:10,627 - module_a - DEBUG - Preparing to send events: {'key_8': 'value_8', 'timestamp': '1749849910.6266692', 'status': 'active', 'source': 'Module A', 'sequence': '8', 'runtime': '7.071242809295654', 'time_since_last': '0.0'}
+2025-06-13 18:25:10,627 - module_a - INFO - Sending events 8
+2025-06-13 18:25:10,632 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:10,632 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:10,641 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849910.6266692 | status: active | runtime: 7.071242809295654 | source: Module A | key_8: value_8 | sequence: 8 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849910.630527 | processing_sequence: 8))
+2025-06-13 18:25:11,635 - module_a - DEBUG - Extracted event 9: {'key_9': 'value_9', 'timestamp': '1749849911.6350582', 'status': 'active', 'source': 'Module A', 'sequence': '9', 'runtime': '8.079633951187134', 'time_since_last': '0.0'}
+2025-06-13 18:25:11,635 - module_a - DEBUG - Preparing to send events: {'key_9': 'value_9', 'timestamp': '1749849911.6350582', 'status': 'active', 'source': 'Module A', 'sequence': '9', 'runtime': '8.079633951187134', 'time_since_last': '0.0'}
+2025-06-13 18:25:11,635 - module_a - INFO - Sending events 9
+2025-06-13 18:25:11,640 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:11,640 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:11,647 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (key_9: value_9 | timestamp: 1749849911.6350582 | status: active | runtime: 8.079633951187134 | source: Module A | sequence: 9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849911.6384068 | processing_sequence: 9))
+2025-06-13 18:25:12,640 - module_a - DEBUG - Extracted event 10: {'key_10': 'value_10', 'timestamp': '1749849912.640759', 'status': 'active', 'source': 'Module A', 'sequence': '10', 'runtime': '9.085322141647339', 'time_since_last': '0.0'}
+2025-06-13 18:25:12,641 - module_a - DEBUG - Preparing to send events: {'key_10': 'value_10', 'timestamp': '1749849912.640759', 'status': 'active', 'source': 'Module A', 'sequence': '10', 'runtime': '9.085322141647339', 'time_since_last': '0.0'}
+2025-06-13 18:25:12,641 - module_a - INFO - Sending events 10
+2025-06-13 18:25:12,645 - module_a - DEBUG - Received acknowledgment from B: success: True, message: Dictionary received
+2025-06-13 18:25:12,645 - module_a - INFO - Got acknowledgment from B
+2025-06-13 18:25:12,654 - module_a - DEBUG - Received final result from C: (Processed by C) ((Processed by B) (timestamp: 1749849912.640759 | key_10: value_10 | status: active | runtime: 9.085322141647339 | source: Module A | sequence: 10 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849912.6443944 | processing_sequence: 10))
+2025-06-13 18:25:13,647 - module_a - DEBUG - Client finished sending messages. Stats: {'total_events': 10, 'runtime': 10.092286109924316, 'average_interval': 0.0}
+2025-06-13 18:25:13,648 - module_a - INFO - Finished sending 10 messages. Server remains active to receive responses.

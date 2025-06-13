@@ -1,86 +1,25 @@
-2025-06-13 13:24:07,416 - module_c - DEBUG - Initializing Module C with environment variables:
-MODULE_C_HOST: localhost:50052
-MODULE_A_HOST: localhost:50053
-2025-06-13 13:24:07,416 - module_c - DEBUG - TextToSpeech initialized
-2025-06-13 13:24:07,423 - module_c - DEBUG - Server initialized and listening on localhost:50052
-2025-06-13 13:24:07,423 - module_c - INFO - Server listening on localhost:50052
-2025-06-13 13:24:11,476 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 1 | source: Module A | runtime: 0.008352279663085938 | timestamp: 1749831851.4657993 | key_1: value_1 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831851.4695575 | processing_sequence: 1)
-2025-06-13 13:24:11,476 - module_c - INFO - Got string from B
-2025-06-13 13:24:11,476 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:11,476 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 1 | source: Module A | runtime: 0.008352279663085938 | timestamp: 1749831851.4657993 | key_1: value_1 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831851.4695575 | processing_sequence: 1))
-2025-06-13 13:24:11,477 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:11,477 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:11,483 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:11,483 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:12,477 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 2 | source: Module A | key_2: value_2 | runtime: 1.014503002166748 | timestamp: 1749831852.4719565 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.4742315 | processing_sequence: 2)
-2025-06-13 13:24:12,477 - module_c - INFO - Got string from B
-2025-06-13 13:24:12,477 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:12,477 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 2 | source: Module A | key_2: value_2 | runtime: 1.014503002166748 | timestamp: 1749831852.4719565 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.4742315 | processing_sequence: 2))
-2025-06-13 13:24:12,478 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:12,478 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:12,481 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:12,481 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:12,301 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 3 | runtime: 0.8379242420196533 | source: Module A | key_3: value_3 | timestamp: 1749831852.2953806 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.2979295 | processing_sequence: 3)
-2025-06-13 13:24:12,302 - module_c - INFO - Got string from B
-2025-06-13 13:24:12,302 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:12,303 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 3 | runtime: 0.8379242420196533 | source: Module A | key_3: value_3 | timestamp: 1749831852.2953806 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.2979295 | processing_sequence: 3))
-2025-06-13 13:24:12,303 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:12,303 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:12,308 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:12,309 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:13,304 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 4 | source: Module A | runtime: 1.8423359394073486 | timestamp: 1749831853.2997894 | status: active | key_4: value_4 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831853.3017068 | processing_sequence: 4)
-2025-06-13 13:24:13,304 - module_c - INFO - Got string from B
-2025-06-13 13:24:13,304 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:13,305 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 4 | source: Module A | runtime: 1.8423359394073486 | timestamp: 1749831853.2997894 | status: active | key_4: value_4 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831853.3017068 | processing_sequence: 4))
-2025-06-13 13:24:13,305 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:13,305 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:13,308 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:13,308 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:14,308 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 5 | source: Module A | key_5: value_5 | runtime: 2.846536159515381 | timestamp: 1749831854.3039908 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831854.3054543 | processing_sequence: 5)
-2025-06-13 13:24:14,308 - module_c - INFO - Got string from B
-2025-06-13 13:24:14,308 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:14,308 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 5 | source: Module A | key_5: value_5 | runtime: 2.846536159515381 | timestamp: 1749831854.3039908 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831854.3054543 | processing_sequence: 5))
-2025-06-13 13:24:14,308 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:14,309 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:14,315 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:14,315 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:15,314 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 6 | source: Module A | key_6: value_6 | runtime: 3.850482940673828 | timestamp: 1749831855.3079383 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831855.3103118 | processing_sequence: 6)
-2025-06-13 13:24:15,314 - module_c - INFO - Got string from B
-2025-06-13 13:24:15,314 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:15,314 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 6 | source: Module A | key_6: value_6 | runtime: 3.850482940673828 | timestamp: 1749831855.3079383 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831855.3103118 | processing_sequence: 6))
-2025-06-13 13:24:15,315 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:15,315 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:15,320 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:15,320 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:16,322 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 7 | source: Module A | runtime: 4.855538606643677 | timestamp: 1749831856.3129928 | key_7: value_7 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831856.3160243 | processing_sequence: 7)
-2025-06-13 13:24:16,322 - module_c - INFO - Got string from B
-2025-06-13 13:24:16,322 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:16,322 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 7 | source: Module A | runtime: 4.855538606643677 | timestamp: 1749831856.3129928 | key_7: value_7 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831856.3160243 | processing_sequence: 7))
-2025-06-13 13:24:16,322 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:16,322 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:16,327 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:16,327 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:17,327 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 8 | source: Module A | runtime: 5.861465692520142 | timestamp: 1749831857.318922 | status: active | key_8: value_8 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831857.3219454 | processing_sequence: 8)
-2025-06-13 13:24:17,328 - module_c - INFO - Got string from B
-2025-06-13 13:24:17,328 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:17,328 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 8 | source: Module A | runtime: 5.861465692520142 | timestamp: 1749831857.318922 | status: active | key_8: value_8 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831857.3219454 | processing_sequence: 8))
-2025-06-13 13:24:17,328 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:17,328 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:17,334 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:17,334 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:18,329 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 9 | source: Module A | runtime: 6.867883205413818 | timestamp: 1749831858.3253386 | status: active | key_9: value_9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831858.3269005 | processing_sequence: 9)
-2025-06-13 13:24:18,329 - module_c - INFO - Got string from B
-2025-06-13 13:24:18,329 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:18,329 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 9 | source: Module A | runtime: 6.867883205413818 | timestamp: 1749831858.3253386 | status: active | key_9: value_9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831858.3269005 | processing_sequence: 9))
-2025-06-13 13:24:18,329 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:18,329 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:18,333 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:18,333 - module_c - INFO - Sent final result to A
-2025-06-13 13:24:19,335 - module_c - DEBUG - Received string from B: (Processed by B) (sequence: 10 | timestamp: 1749831859.3292694 | key_10: value_10 | runtime: 7.8718156814575195 | source: Module A | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831859.3322308 | processing_sequence: 10)
-2025-06-13 13:24:19,335 - module_c - INFO - Got string from B
-2025-06-13 13:24:19,335 - module_c - DEBUG - Starting background processing thread
-2025-06-13 13:24:19,336 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (sequence: 10 | timestamp: 1749831859.3292694 | key_10: value_10 | runtime: 7.8718156814575195 | source: Module A | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831859.3322308 | processing_sequence: 10))
-2025-06-13 13:24:19,336 - module_c - DEBUG - Waiting 3 seconds before sending to A
-2025-06-13 13:24:19,336 - module_c - DEBUG - Connecting to Module A at localhost:50053
-2025-06-13 13:24:19,339 - module_c - DEBUG - Sent final result to A
-2025-06-13 13:24:19,339 - module_c - INFO - Sent final result to A
+2025-06-13 18:25:01,546 - module_c - DEBUG - Initializing Module C with environment variables: MODULE_C_HOST: localhost:50052, MODULE_A_HOST: localhost:50053
+2025-06-13 18:25:01,546 - module_c - DEBUG - TextToSpeech initialized
+2025-06-13 18:25:01,560 - module_c - DEBUG - Server initialized and listening on localhost:50052
+2025-06-13 18:25:01,560 - module_c - INFO - Server listening on localhost:50052
+2025-06-13 18:25:05,611 - module_c - DEBUG - Received string from B: (Processed by B) (timestamp: 1749849905.590985 | time_since_last: 0.0 | status: active | runtime: 2.0355684757232666 | source: Module A | sequence: 3 | key_3: value_3 | processed_by: Module B | processing_time: 1749849905.59339 | processing_sequence: 3)
+2025-06-13 18:25:05,611 - module_c - INFO - Got string from B
+2025-06-13 18:25:05,611 - module_c - DEBUG - Starting background processing thread
+2025-06-13 18:25:05,614 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (timestamp: 1749849905.590985 | time_since_last: 0.0 | status: active | runtime: 2.0355684757232666 | source: Module A | sequence: 3 | key_3: value_3 | processed_by: Module B | processing_time: 1749849905.59339 | processing_sequence: 3))
+2025-06-13 18:25:05,614 - module_c - DEBUG - Connecting to Module A at localhost:50053
+2025-06-13 18:25:05,625 - module_c - DEBUG - Sent final result to A
+2025-06-13 18:25:05,625 - module_c - INFO - Sent final result to A
+2025-06-13 18:25:11,642 - module_c - DEBUG - Received string from B: (Processed by B) (key_9: value_9 | timestamp: 1749849911.6350582 | status: active | runtime: 8.079633951187134 | source: Module A | sequence: 9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849911.6384068 | processing_sequence: 9)
+2025-06-13 18:25:11,643 - module_c - INFO - Got string from B
+2025-06-13 18:25:11,643 - module_c - DEBUG - Starting background processing thread
+2025-06-13 18:25:11,643 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (key_9: value_9 | timestamp: 1749849911.6350582 | status: active | runtime: 8.079633951187134 | source: Module A | sequence: 9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849911.6384068 | processing_sequence: 9))
+2025-06-13 18:25:11,644 - module_c - DEBUG - Connecting to Module A at localhost:50053
+2025-06-13 18:25:11,648 - module_c - DEBUG - Sent final result to A
+2025-06-13 18:25:11,648 - module_c - INFO - Sent final result to A
+2025-06-13 18:25:12,649 - module_c - DEBUG - Received string from B: (Processed by B) (timestamp: 1749849912.640759 | key_10: value_10 | status: active | runtime: 9.085322141647339 | source: Module A | sequence: 10 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849912.6443944 | processing_sequence: 10)
+2025-06-13 18:25:12,649 - module_c - INFO - Got string from B
+2025-06-13 18:25:12,649 - module_c - DEBUG - Starting background processing thread
+2025-06-13 18:25:12,650 - module_c - DEBUG - Processed text: (Processed by C) ((Processed by B) (timestamp: 1749849912.640759 | key_10: value_10 | status: active | runtime: 9.085322141647339 | source: Module A | sequence: 10 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749849912.6443944 | processing_sequence: 10))
+2025-06-13 18:25:12,650 - module_c - DEBUG - Connecting to Module A at localhost:50053
+2025-06-13 18:25:12,655 - module_c - DEBUG - Sent final result to A
+2025-06-13 18:25:12,655 - module_c - INFO - Sent final result to A
