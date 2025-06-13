@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package proto;
+
+message DictionaryData {
+    map<string, string> data = 1;
+}
+
+message StringData {
+    string data = 1;
+}
+
+message Empty {}
+
+message Ack {
+    bool success = 1;
+    string message = 2;
+}
+
+service ModuleA {
+    rpc Notify(StringData) returns (Empty);
+}
+
+service ModuleB {
+    rpc ProcessFromA(DictionaryData) returns (Ack);
+}
+
+service ModuleC {
+    rpc Finalize(StringData) returns (Ack);
+}

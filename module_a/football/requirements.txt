@@ -1,9 +1,0 @@
-# If you change any of the requirements here please don't forget to change them in setup.py too
-setuptools==58.2.0
-pygame>=1.9.6
-opencv-python
-psutil
-numpy
-gym<=0.21.0
-absl-py
-wheel

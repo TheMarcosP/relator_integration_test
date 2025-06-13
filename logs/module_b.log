@@ -1,0 +1,106 @@
+2025-06-13 13:24:09,465 - module_b - DEBUG - Initializing Module B with environment variables:
+MODULE_B_HOST: localhost:50051
+MODULE_C_HOST: localhost:50052
+2025-06-13 13:24:09,465 - module_b - DEBUG - EventToText initialized
+2025-06-13 13:24:09,475 - module_b - DEBUG - Server initialized and listening on localhost:50051
+2025-06-13 13:24:09,475 - module_b - INFO - Server listening on localhost:50051
+2025-06-13 13:24:11,469 - module_b - DEBUG - Received dictionary from A: {'sequence': '1', 'source': 'Module A', 'runtime': '0.008352279663085938', 'timestamp': '1749831851.4657993', 'key_1': 'value_1', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:11,469 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:11,469 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:11,469 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 1 | source: Module A | runtime: 0.008352279663085938 | timestamp: 1749831851.4657993 | key_1: value_1 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831851.4695575 | processing_sequence: 1)
+2025-06-13 13:24:11,469 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:11,470 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:11,477 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:11,477 - module_b - INFO - Got back from C
+2025-06-13 13:24:12,473 - module_b - DEBUG - Received dictionary from A: {'sequence': '2', 'source': 'Module A', 'key_2': 'value_2', 'runtime': '1.014503002166748', 'timestamp': '1749831852.4719565', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:12,473 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:12,473 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:12,474 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 2 | source: Module A | key_2: value_2 | runtime: 1.014503002166748 | timestamp: 1749831852.4719565 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.4742315 | processing_sequence: 2)
+2025-06-13 13:24:12,474 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:12,475 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:12,478 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:12,478 - module_b - INFO - Got back from C
+2025-06-13 13:24:12,297 - module_b - DEBUG - Received dictionary from A: {'sequence': '3', 'runtime': '0.8379242420196533', 'source': 'Module A', 'key_3': 'value_3', 'timestamp': '1749831852.2953806', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:12,297 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:12,297 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:12,297 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 3 | runtime: 0.8379242420196533 | source: Module A | key_3: value_3 | timestamp: 1749831852.2953806 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831852.2979295 | processing_sequence: 3)
+2025-06-13 13:24:12,298 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:12,298 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:12,304 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:12,304 - module_b - INFO - Got back from C
+2025-06-13 13:24:13,301 - module_b - DEBUG - Received dictionary from A: {'sequence': '4', 'source': 'Module A', 'runtime': '1.8423359394073486', 'timestamp': '1749831853.2997894', 'status': 'active', 'key_4': 'value_4', 'time_since_last': '0.0'}
+2025-06-13 13:24:13,301 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:13,301 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:13,301 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 4 | source: Module A | runtime: 1.8423359394073486 | timestamp: 1749831853.2997894 | status: active | key_4: value_4 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831853.3017068 | processing_sequence: 4)
+2025-06-13 13:24:13,301 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:13,301 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:13,305 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:13,305 - module_b - INFO - Got back from C
+2025-06-13 13:24:14,305 - module_b - DEBUG - Received dictionary from A: {'sequence': '5', 'source': 'Module A', 'key_5': 'value_5', 'runtime': '2.846536159515381', 'timestamp': '1749831854.3039908', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:14,305 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:14,305 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:14,305 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 5 | source: Module A | key_5: value_5 | runtime: 2.846536159515381 | timestamp: 1749831854.3039908 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831854.3054543 | processing_sequence: 5)
+2025-06-13 13:24:14,305 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:14,305 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:14,310 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:14,310 - module_b - INFO - Got back from C
+2025-06-13 13:24:15,309 - module_b - DEBUG - Received dictionary from A: {'sequence': '6', 'source': 'Module A', 'key_6': 'value_6', 'runtime': '3.850482940673828', 'timestamp': '1749831855.3079383', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:15,309 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:15,310 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:15,310 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 6 | source: Module A | key_6: value_6 | runtime: 3.850482940673828 | timestamp: 1749831855.3079383 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831855.3103118 | processing_sequence: 6)
+2025-06-13 13:24:15,310 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:15,310 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:15,316 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:15,316 - module_b - INFO - Got back from C
+2025-06-13 13:24:16,315 - module_b - DEBUG - Received dictionary from A: {'sequence': '7', 'source': 'Module A', 'runtime': '4.855538606643677', 'timestamp': '1749831856.3129928', 'key_7': 'value_7', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:16,315 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:16,315 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:16,316 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 7 | source: Module A | runtime: 4.855538606643677 | timestamp: 1749831856.3129928 | key_7: value_7 | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831856.3160243 | processing_sequence: 7)
+2025-06-13 13:24:16,316 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:16,317 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:16,322 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:16,323 - module_b - INFO - Got back from C
+2025-06-13 13:24:17,321 - module_b - DEBUG - Received dictionary from A: {'sequence': '8', 'source': 'Module A', 'runtime': '5.861465692520142', 'timestamp': '1749831857.318922', 'status': 'active', 'key_8': 'value_8', 'time_since_last': '0.0'}
+2025-06-13 13:24:17,321 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:17,321 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:17,321 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 8 | source: Module A | runtime: 5.861465692520142 | timestamp: 1749831857.318922 | status: active | key_8: value_8 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831857.3219454 | processing_sequence: 8)
+2025-06-13 13:24:17,322 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:17,322 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:17,330 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:17,330 - module_b - INFO - Got back from C
+2025-06-13 13:24:18,326 - module_b - DEBUG - Received dictionary from A: {'sequence': '9', 'source': 'Module A', 'runtime': '6.867883205413818', 'timestamp': '1749831858.3253386', 'status': 'active', 'key_9': 'value_9', 'time_since_last': '0.0'}
+2025-06-13 13:24:18,326 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:18,326 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:18,326 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 9 | source: Module A | runtime: 6.867883205413818 | timestamp: 1749831858.3253386 | status: active | key_9: value_9 | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831858.3269005 | processing_sequence: 9)
+2025-06-13 13:24:18,327 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:18,327 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:18,330 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:18,330 - module_b - INFO - Got back from C
+2025-06-13 13:24:19,331 - module_b - DEBUG - Received dictionary from A: {'sequence': '10', 'timestamp': '1749831859.3292694', 'key_10': 'value_10', 'runtime': '7.8718156814575195', 'source': 'Module A', 'status': 'active', 'time_since_last': '0.0'}
+2025-06-13 13:24:19,331 - module_b - INFO - Got dictionary from A
+2025-06-13 13:24:19,331 - module_b - DEBUG - Starting background processing thread
+2025-06-13 13:24:19,332 - module_b - DEBUG - Converted dictionary to text: (Processed by B) (sequence: 10 | timestamp: 1749831859.3292694 | key_10: value_10 | runtime: 7.8718156814575195 | source: Module A | status: active | time_since_last: 0.0 | processed_by: Module B | processing_time: 1749831859.3322308 | processing_sequence: 10)
+2025-06-13 13:24:19,332 - module_b - DEBUG - Waiting 2 seconds before sending to C
+2025-06-13 13:24:19,332 - module_b - DEBUG - Connecting to Module C at localhost:50052
+2025-06-13 13:24:19,336 - module_b - DEBUG - Received response from C: success: true
+message: "String received"
+
+2025-06-13 13:24:19,336 - module_b - INFO - Got back from C
