@@ -1,81 +1,80 @@
-# gRPC Microservices Example
+# gRPC Pipeline Project
 
-This project contains three gRPC modules (A, B, C) that communicate with each other. Each module can be run locally or remotely, and their endpoints and ports are configurable via environment variables.
+This project implements a gRPC-based pipeline for processing events through multiple modules. The pipeline consists of four modules that handle different stages of processing:
 
-## Structure
-- `module_a`: Generates events and sends them to Module B
-- `module_b`: Processes events and forwards them to Module C
-- `module_c`: Finalizes the processing and sends results back to Module A
+1. Module A: Simple sender that sends dictionaries to Module B
+2. Module B: Converts events to text and forwards to Module C
+3. Module C: Converts text to speech and forwards to Module D
+4. Module D: Handles speech reproduction
 
-## Environment Variables
-Each module uses environment variables to configure their ports and dependencies. The variables are loaded automatically using `python-dotenv`.
+## Module Structure
 
-Example `.env` (at the project root):
-```
-MODULE_A_HOST=localhost:50053
+Each module is located in its own directory:
+- `module_a/`: Contains a simple sender script that sends dictionaries to Module B
+- `module_b/`: Text conversion
+- `module_c/`: Text-to-speech conversion
+- `module_d/`: Speech reproduction
+
+## Configuration
+
+The modules use environment variables for configuration. Create a `.env` file with the following variables:
+
+```env
 MODULE_B_HOST=localhost:50051
 MODULE_C_HOST=localhost:50052
+MODULE_D_HOST=localhost:50053
 ```
 
-**All required environment variables must be set.** If any are missing, the modules and scripts will fail with a clear error message.
+## Running the Pipeline
 
-## Running the Modules
-
-### Recommended: Use the Orchestrator Script
-The preferred way to run the modules is with the provided script, which allows you to launch any combination of modules from the project root:
+1. Start all servers in separate terminals:
 
 ```bash
-# Run all modules
-python -m scripts.run_grpc_modules a b c
+# Terminal 1 (Module A - sender)
+python module_a/dummy_sender.py
 
-# Run just module C
-python -m scripts.run_grpc_modules c
+# Terminal 2
+python module_b/server.py
 
-# Run modules A and B
-python -m scripts.run_grpc_modules a b
+# Terminal 3
+python module_c/server.py
+
+# Terminal 4
+python module_d/server.py
 ```
 
-The script will:
-1. Start each module using Python's module system
-2. Monitor their status
-3. Handle graceful shutdown when you press Ctrl+C
-4. Clean up all processes if any module fails
+## Testing
 
-### Alternative: Run Modules Standalone
-You can also run each module directly using Python's module system:
+The test script (`module_a/test_pipeline.py`) generates random events and sends them through the pipeline with random delays between requests. This helps test the system's ability to handle multiple requests at different rates.
+
+## Dependencies
+
+- Python 3.7+
+- grpcio
+- grpcio-tools
+- python-dotenv
+
+Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+## Protocol Buffers
+
+The service definitions are in `proto/data.proto`. To regenerate the Python code from the proto file:
 
 ```bash
-# Terminal 1 (Module A)
-python -m module_a.module_a_server
-
-# Terminal 2 (Module B)
-python -m module_b.module_b_server
-
-# Terminal 3 (Module C)
-python -m module_c.module_c_server
+python -m grpc_tools.protoc -I./proto --python_out=. --grpc_python_out=. ./proto/data.proto
 ```
 
-### Test the Chain
-Once the modules are running, Module A will automatically start sending events through the chain. You can monitor the logs in the `logs` directory:
+## Quick Port Cleanup
+
+While developing you might leave gRPC servers running which blocks their ports (50051-50053).  The helper script below will instantly free the ports by killing any process that is listening on them.
 
 ```bash
-# View Module A logs
-tail -f logs/module_a.log
+# kill the default gRPC ports
+python scripts/kill_ports.py 50051 50052 50053
 
-# View Module B logs
-tail -f logs/module_b.log
-
-# View Module C logs
-tail -f logs/module_c.log
-```
-
-## Implementation Notes
-- All modules use gRPC for communication
-- Each module runs its own gRPC server
-- Logging is configured to output to both console and log files
-- Environment variables are managed via `.env` file and loaded with `python-dotenv`
-- All modules and scripts will fail fast if any required environment variable is missing
-
----
-
-You can deploy any module remotely or locally, and configure the host addresses accordingly. The modules will automatically handle the gRPC communication between them. 
+# or pick ports via environment variable
+export KILL_PORTS="50051,50052"
+python scripts/kill_ports.py 

@@ -4,27 +4,35 @@ package proto;
 
 message DictionaryData {
     map<string, string> data = 1;
+    int32 universal_id = 2; 
 }
 
-message StringData {
+message TextData {
     string data = 1;
+    int32 universal_id = 2; 
 }
 
-message Empty {}
+message SpeechData {
+    string data = 1;
+    int32 universal_id = 2; 
+}
+
 
 message Ack {
     bool success = 1;
     string message = 2;
+    int32 universal_id = 3; 
 }
 
-service ModuleA {
-    rpc Notify(StringData) returns (Empty);
-}
 
 service ModuleB {
-    rpc ProcessFromA(DictionaryData) returns (Ack);
+    rpc eventToTextRequest(DictionaryData) returns (Ack);
 }
 
 service ModuleC {
-    rpc Finalize(StringData) returns (Ack);
+    rpc textToSpeechRequest(TextData) returns (Ack);
+}
+
+service ModuleD {
+    rpc ReproduceSpeechRequest(SpeechData) returns (Ack);
 }

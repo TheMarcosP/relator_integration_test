@@ -25,78 +25,6 @@ if _version_not_supported:
     )
 
 
-class ModuleAStub(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
-        self.Notify = channel.unary_unary(
-                '/proto.ModuleA/Notify',
-                request_serializer=data__pb2.StringData.SerializeToString,
-                response_deserializer=data__pb2.Empty.FromString,
-                _registered_method=True)
-
-
-class ModuleAServicer(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def Notify(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_ModuleAServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'Notify': grpc.unary_unary_rpc_method_handler(
-                    servicer.Notify,
-                    request_deserializer=data__pb2.StringData.FromString,
-                    response_serializer=data__pb2.Empty.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'proto.ModuleA', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('proto.ModuleA', rpc_method_handlers)
-
-
- # This class is part of an EXPERIMENTAL API.
-class ModuleA(object):
-    """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def Notify(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/proto.ModuleA/Notify',
-            data__pb2.StringData.SerializeToString,
-            data__pb2.Empty.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-
 class ModuleBStub(object):
     """Missing associated documentation comment in .proto file."""
 
@@ -106,8 +34,8 @@ class ModuleBStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ProcessFromA = channel.unary_unary(
-                '/proto.ModuleB/ProcessFromA',
+        self.eventToTextRequest = channel.unary_unary(
+                '/proto.ModuleB/eventToTextRequest',
                 request_serializer=data__pb2.DictionaryData.SerializeToString,
                 response_deserializer=data__pb2.Ack.FromString,
                 _registered_method=True)
@@ -116,7 +44,7 @@ class ModuleBStub(object):
 class ModuleBServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ProcessFromA(self, request, context):
+    def eventToTextRequest(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -125,8 +53,8 @@ class ModuleBServicer(object):
 
 def add_ModuleBServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ProcessFromA': grpc.unary_unary_rpc_method_handler(
-                    servicer.ProcessFromA,
+            'eventToTextRequest': grpc.unary_unary_rpc_method_handler(
+                    servicer.eventToTextRequest,
                     request_deserializer=data__pb2.DictionaryData.FromString,
                     response_serializer=data__pb2.Ack.SerializeToString,
             ),
@@ -142,7 +70,7 @@ class ModuleB(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ProcessFromA(request,
+    def eventToTextRequest(request,
             target,
             options=(),
             channel_credentials=None,
@@ -155,7 +83,7 @@ class ModuleB(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.ModuleB/ProcessFromA',
+            '/proto.ModuleB/eventToTextRequest',
             data__pb2.DictionaryData.SerializeToString,
             data__pb2.Ack.FromString,
             options,
@@ -178,9 +106,9 @@ class ModuleCStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Finalize = channel.unary_unary(
-                '/proto.ModuleC/Finalize',
-                request_serializer=data__pb2.StringData.SerializeToString,
+        self.textToSpeechRequest = channel.unary_unary(
+                '/proto.ModuleC/textToSpeechRequest',
+                request_serializer=data__pb2.TextData.SerializeToString,
                 response_deserializer=data__pb2.Ack.FromString,
                 _registered_method=True)
 
@@ -188,7 +116,7 @@ class ModuleCStub(object):
 class ModuleCServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Finalize(self, request, context):
+    def textToSpeechRequest(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -197,9 +125,9 @@ class ModuleCServicer(object):
 
 def add_ModuleCServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Finalize': grpc.unary_unary_rpc_method_handler(
-                    servicer.Finalize,
-                    request_deserializer=data__pb2.StringData.FromString,
+            'textToSpeechRequest': grpc.unary_unary_rpc_method_handler(
+                    servicer.textToSpeechRequest,
+                    request_deserializer=data__pb2.TextData.FromString,
                     response_serializer=data__pb2.Ack.SerializeToString,
             ),
     }
@@ -214,7 +142,7 @@ class ModuleC(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Finalize(request,
+    def textToSpeechRequest(request,
             target,
             options=(),
             channel_credentials=None,
@@ -227,8 +155,80 @@ class ModuleC(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.ModuleC/Finalize',
-            data__pb2.StringData.SerializeToString,
+            '/proto.ModuleC/textToSpeechRequest',
+            data__pb2.TextData.SerializeToString,
+            data__pb2.Ack.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class ModuleDStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.ReproduceSpeechRequest = channel.unary_unary(
+                '/proto.ModuleD/ReproduceSpeechRequest',
+                request_serializer=data__pb2.SpeechData.SerializeToString,
+                response_deserializer=data__pb2.Ack.FromString,
+                _registered_method=True)
+
+
+class ModuleDServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def ReproduceSpeechRequest(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_ModuleDServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'ReproduceSpeechRequest': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReproduceSpeechRequest,
+                    request_deserializer=data__pb2.SpeechData.FromString,
+                    response_serializer=data__pb2.Ack.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'proto.ModuleD', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('proto.ModuleD', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class ModuleD(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def ReproduceSpeechRequest(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.ModuleD/ReproduceSpeechRequest',
+            data__pb2.SpeechData.SerializeToString,
             data__pb2.Ack.FromString,
             options,
             channel_credentials,

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ndata.proto\x12\x05proto\"l\n\x0e\x44ictionaryData\x12-\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1f.proto.DictionaryData.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1a\n\nStringData\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\"\x07\n\x05\x45mpty\"\'\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t24\n\x07ModuleA\x12)\n\x06Notify\x12\x11.proto.StringData\x1a\x0c.proto.Empty2<\n\x07ModuleB\x12\x31\n\x0cProcessFromA\x12\x15.proto.DictionaryData\x1a\n.proto.Ack24\n\x07ModuleC\x12)\n\x08\x46inalize\x12\x11.proto.StringData\x1a\n.proto.Ackb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ndata.proto\x12\x05proto\"\x82\x01\n\x0e\x44ictionaryData\x12-\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1f.proto.DictionaryData.DataEntry\x12\x14\n\x0cuniversal_id\x18\x02 \x01(\x05\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\".\n\x08TextData\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\x12\x14\n\x0cuniversal_id\x18\x02 \x01(\x05\"0\n\nSpeechData\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\x12\x14\n\x0cuniversal_id\x18\x02 \x01(\x05\"=\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x14\n\x0cuniversal_id\x18\x03 \x01(\x05\x32\x42\n\x07ModuleB\x12\x37\n\x12\x65ventToTextRequest\x12\x15.proto.DictionaryData\x1a\n.proto.Ack2=\n\x07ModuleC\x12\x32\n\x13textToSpeechRequest\x12\x0f.proto.TextData\x1a\n.proto.Ack2B\n\x07ModuleD\x12\x37\n\x16ReproduceSpeechRequest\x12\x11.proto.SpeechData\x1a\n.proto.Ackb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,20 +33,20 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_DICTIONARYDATA_DATAENTRY']._loaded_options = None
   _globals['_DICTIONARYDATA_DATAENTRY']._serialized_options = b'8\001'
-  _globals['_DICTIONARYDATA']._serialized_start=21
-  _globals['_DICTIONARYDATA']._serialized_end=129
-  _globals['_DICTIONARYDATA_DATAENTRY']._serialized_start=86
-  _globals['_DICTIONARYDATA_DATAENTRY']._serialized_end=129
-  _globals['_STRINGDATA']._serialized_start=131
-  _globals['_STRINGDATA']._serialized_end=157
-  _globals['_EMPTY']._serialized_start=159
-  _globals['_EMPTY']._serialized_end=166
-  _globals['_ACK']._serialized_start=168
-  _globals['_ACK']._serialized_end=207
-  _globals['_MODULEA']._serialized_start=209
-  _globals['_MODULEA']._serialized_end=261
-  _globals['_MODULEB']._serialized_start=263
-  _globals['_MODULEB']._serialized_end=323
-  _globals['_MODULEC']._serialized_start=325
-  _globals['_MODULEC']._serialized_end=377
+  _globals['_DICTIONARYDATA']._serialized_start=22
+  _globals['_DICTIONARYDATA']._serialized_end=152
+  _globals['_DICTIONARYDATA_DATAENTRY']._serialized_start=109
+  _globals['_DICTIONARYDATA_DATAENTRY']._serialized_end=152
+  _globals['_TEXTDATA']._serialized_start=154
+  _globals['_TEXTDATA']._serialized_end=200
+  _globals['_SPEECHDATA']._serialized_start=202
+  _globals['_SPEECHDATA']._serialized_end=250
+  _globals['_ACK']._serialized_start=252
+  _globals['_ACK']._serialized_end=313
+  _globals['_MODULEB']._serialized_start=315
+  _globals['_MODULEB']._serialized_end=381
+  _globals['_MODULEC']._serialized_start=383
+  _globals['_MODULEC']._serialized_end=444
+  _globals['_MODULED']._serialized_start=446
+  _globals['_MODULED']._serialized_end=512
 # @@protoc_insertion_point(module_scope)
