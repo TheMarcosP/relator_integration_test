@@ -1,46 +1,50 @@
-import grpc
-import asyncio
+import logging
 from concurrent import futures
-import sys
-import os
-
-# Add the proto directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from proto import data_pb2, data_pb2_grpc
+import grpc
 from scripts.utils import get_env_var
+from proto import data_pb2, data_pb2_grpc
+from module_c.dummy_text_to_speech import TextToAudio # Update this import with the actual implementation
+
+logging.basicConfig(level=logging.INFO, format="[Module C] %(asctime)s - %(levelname)s - %(message)s")
+
+MODULE_C_HOST = get_env_var("MODULE_C_HOST", "localhost:50052")
+MODULE_D_HOST = get_env_var("MODULE_D_HOST", "localhost:50053")
+
 
 class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
     def __init__(self):
-        self.module_d_host = get_env_var('MODULE_D_HOST', 'localhost:50053')
-        self.channel = grpc.aio.insecure_channel(self.module_d_host)
-        self.stub = data_pb2_grpc.ModuleDStub(self.channel)
+        self._d_channel = grpc.insecure_channel(MODULE_D_HOST)
+        self._d_stub = data_pb2_grpc.ModuleDStub(self._d_channel)
+        logging.info(f"✅ Initialized connection to Module D at {MODULE_D_HOST}")
 
-    async def textToSpeechRequest(self, request, context):
+        # processing component
+        self.TextToAudio = TextToAudio()
+
+    def TextToSpeech(self, request: data_pb2.TextRequest, context):  # noqa: N802
+        logging.info(f"📥 Received text to process (id={request.id}): '{request.text[:30]}…'")
+        audio_bytes = self.TextToAudio.process(request)
+        logging.info(f"➡️  Forwarding audio to Module D … (id={request.id})")
         try:
-            # Dummy text-to-speech conversion
-            speech_data = f"SPEECH_{request.data}"
-            
-            # Create speech request for Module D
-            speech_request = data_pb2.SpeechData(
-                data=speech_data,
-                universal_id=request.universal_id
+            response_d = self._d_stub.PlayAudio(
+                data_pb2.AudioRequest(id=request.id, audio_data=audio_bytes)
             )
-            
-            # Forward to Module D
-            response = await self.stub.ReproduceSpeechRequest(speech_request)
-            return response
-        except Exception as e:
-            return data_pb2.Ack(success=False, message=str(e), universal_id=request.universal_id)
+            success = response_d.success
+            msg = response_d.message
+        except grpc.RpcError as exc:
+            success = False
+            msg = f"❌ Failed to call Module D: {exc.details()}"
+            logging.error(msg)
+        return data_pb2.BasicResponse(id=request.id, success=success, message=msg)
 
-async def serve():
-    server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=10))
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleCServicer_to_server(ModuleCServicer(), server)
-    
-    port = int(get_env_var('MODULE_C_PORT', '50052'))
-    server.add_insecure_port(f'[::]:{port}')
-    await server.start()
-    print(f"Module C server started on port {port}")
-    await server.wait_for_termination()
+    server.add_insecure_port(MODULE_C_HOST)
+    server.start()
+    logging.info(f"📡 Module C gRPC server listening on {MODULE_C_HOST}")
+    server.wait_for_termination()
 
-if __name__ == '__main__':
-    asyncio.run(serve()) 
+
+if __name__ == "__main__":
+    serve() 

@@ -1,4 +1,4 @@
-fastapi
-uvicorn
-python-dotenv
-requests
+grpcio==1.63.0
+grpcio-tools==1.63.0
+python-dotenv==1.0.1
+simpleaudio==1.0.4 

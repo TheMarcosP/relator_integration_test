@@ -26,7 +26,8 @@ if _version_not_supported:
 
 
 class ModuleBStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module B
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -34,17 +35,18 @@ class ModuleBStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.eventToTextRequest = channel.unary_unary(
-                '/proto.ModuleB/eventToTextRequest',
-                request_serializer=data__pb2.DictionaryData.SerializeToString,
-                response_deserializer=data__pb2.Ack.FromString,
+        self.ProcessEvent = channel.unary_unary(
+                '/pipeline.ModuleB/ProcessEvent',
+                request_serializer=data__pb2.Event.SerializeToString,
+                response_deserializer=data__pb2.BasicResponse.FromString,
                 _registered_method=True)
 
 
 class ModuleBServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module B
+    """
 
-    def eventToTextRequest(self, request, context):
+    def ProcessEvent(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,24 +55,25 @@ class ModuleBServicer(object):
 
 def add_ModuleBServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'eventToTextRequest': grpc.unary_unary_rpc_method_handler(
-                    servicer.eventToTextRequest,
-                    request_deserializer=data__pb2.DictionaryData.FromString,
-                    response_serializer=data__pb2.Ack.SerializeToString,
+            'ProcessEvent': grpc.unary_unary_rpc_method_handler(
+                    servicer.ProcessEvent,
+                    request_deserializer=data__pb2.Event.FromString,
+                    response_serializer=data__pb2.BasicResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'proto.ModuleB', rpc_method_handlers)
+            'pipeline.ModuleB', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('proto.ModuleB', rpc_method_handlers)
+    server.add_registered_method_handlers('pipeline.ModuleB', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class ModuleB(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module B
+    """
 
     @staticmethod
-    def eventToTextRequest(request,
+    def ProcessEvent(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +86,9 @@ class ModuleB(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.ModuleB/eventToTextRequest',
-            data__pb2.DictionaryData.SerializeToString,
-            data__pb2.Ack.FromString,
+            '/pipeline.ModuleB/ProcessEvent',
+            data__pb2.Event.SerializeToString,
+            data__pb2.BasicResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -98,7 +101,8 @@ class ModuleB(object):
 
 
 class ModuleCStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module C
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -106,17 +110,18 @@ class ModuleCStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.textToSpeechRequest = channel.unary_unary(
-                '/proto.ModuleC/textToSpeechRequest',
-                request_serializer=data__pb2.TextData.SerializeToString,
-                response_deserializer=data__pb2.Ack.FromString,
+        self.TextToSpeech = channel.unary_unary(
+                '/pipeline.ModuleC/TextToSpeech',
+                request_serializer=data__pb2.TextRequest.SerializeToString,
+                response_deserializer=data__pb2.BasicResponse.FromString,
                 _registered_method=True)
 
 
 class ModuleCServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module C
+    """
 
-    def textToSpeechRequest(self, request, context):
+    def TextToSpeech(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -125,24 +130,25 @@ class ModuleCServicer(object):
 
 def add_ModuleCServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'textToSpeechRequest': grpc.unary_unary_rpc_method_handler(
-                    servicer.textToSpeechRequest,
-                    request_deserializer=data__pb2.TextData.FromString,
-                    response_serializer=data__pb2.Ack.SerializeToString,
+            'TextToSpeech': grpc.unary_unary_rpc_method_handler(
+                    servicer.TextToSpeech,
+                    request_deserializer=data__pb2.TextRequest.FromString,
+                    response_serializer=data__pb2.BasicResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'proto.ModuleC', rpc_method_handlers)
+            'pipeline.ModuleC', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('proto.ModuleC', rpc_method_handlers)
+    server.add_registered_method_handlers('pipeline.ModuleC', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class ModuleC(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module C
+    """
 
     @staticmethod
-    def textToSpeechRequest(request,
+    def TextToSpeech(request,
             target,
             options=(),
             channel_credentials=None,
@@ -155,9 +161,9 @@ class ModuleC(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.ModuleC/textToSpeechRequest',
-            data__pb2.TextData.SerializeToString,
-            data__pb2.Ack.FromString,
+            '/pipeline.ModuleC/TextToSpeech',
+            data__pb2.TextRequest.SerializeToString,
+            data__pb2.BasicResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -170,7 +176,8 @@ class ModuleC(object):
 
 
 class ModuleDStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module D
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -178,17 +185,18 @@ class ModuleDStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ReproduceSpeechRequest = channel.unary_unary(
-                '/proto.ModuleD/ReproduceSpeechRequest',
-                request_serializer=data__pb2.SpeechData.SerializeToString,
-                response_deserializer=data__pb2.Ack.FromString,
+        self.PlayAudio = channel.unary_unary(
+                '/pipeline.ModuleD/PlayAudio',
+                request_serializer=data__pb2.AudioRequest.SerializeToString,
+                response_deserializer=data__pb2.BasicResponse.FromString,
                 _registered_method=True)
 
 
 class ModuleDServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module D
+    """
 
-    def ReproduceSpeechRequest(self, request, context):
+    def PlayAudio(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -197,24 +205,25 @@ class ModuleDServicer(object):
 
 def add_ModuleDServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ReproduceSpeechRequest': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReproduceSpeechRequest,
-                    request_deserializer=data__pb2.SpeechData.FromString,
-                    response_serializer=data__pb2.Ack.SerializeToString,
+            'PlayAudio': grpc.unary_unary_rpc_method_handler(
+                    servicer.PlayAudio,
+                    request_deserializer=data__pb2.AudioRequest.FromString,
+                    response_serializer=data__pb2.BasicResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'proto.ModuleD', rpc_method_handlers)
+            'pipeline.ModuleD', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('proto.ModuleD', rpc_method_handlers)
+    server.add_registered_method_handlers('pipeline.ModuleD', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class ModuleD(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service run by Module D
+    """
 
     @staticmethod
-    def ReproduceSpeechRequest(request,
+    def PlayAudio(request,
             target,
             options=(),
             channel_credentials=None,
@@ -227,9 +236,9 @@ class ModuleD(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.ModuleD/ReproduceSpeechRequest',
-            data__pb2.SpeechData.SerializeToString,
-            data__pb2.Ack.FromString,
+            '/pipeline.ModuleD/PlayAudio',
+            data__pb2.AudioRequest.SerializeToString,
+            data__pb2.BasicResponse.FromString,
             options,
             channel_credentials,
             insecure,
