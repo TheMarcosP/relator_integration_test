@@ -4,9 +4,7 @@ package pipeline;
 
 // Event sent from Module A to Module B
 message Event {
-  // globally unique identifier for this workflow instance
   string id = 1;
-  // key/value payload
   map<string, string> data = 2;
 }
 

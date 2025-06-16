@@ -9,7 +9,6 @@ from proto import data_pb2  # type: ignore
 logger = logging.getLogger(__name__)
 
 # Create a similar class for the actual implementation
-# The class name and the method name should be the same
 # Then update the import in the server.py file
 class TextToAudio:
     """Simulates text-to-speech synthesis and returns dummy audio bytes."""
@@ -22,7 +21,7 @@ class TextToAudio:
         random delay to mimic TTS latency.
         """
 
-        logger.info(f"🗣️  Synthesizing id={text_request.id}")
+        logger.info(f"🗣️  Synthesizing (id={text_request.id})")
 
         # Use espeak-ng via helper to synthesise speech to a temporary WAV.
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
@@ -65,7 +64,7 @@ class TextToAudio:
         result = subprocess.run(cmd, capture_output=True)
         
         if result.returncode == 0:
-            logger.info(f"✅ Generated audio for text: {text[:30]}...")
-            logger.info(f"✅ Saved to {wav_path}")
+            logger.info(f"✅ Generated audio for text:\n{text[:90]}...")
+            # logger.info(f"✅ Saved to {wav_path}")
         else:
             logger.error(f"❌ Error: {result.stderr.decode()}")

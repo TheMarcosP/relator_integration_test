@@ -10,7 +10,6 @@ import platform
 
 logger = logging.getLogger(__name__)
 
-
 class OrderedAudioPlayer:
     """Ensures audio is played sequentially in ascending id order regardless of arrival order.
 
@@ -60,7 +59,7 @@ class OrderedAudioPlayer:
                 current_id = self._next_id
                 self._next_id += 1
             logger.info(
-                "🔊 Playing audio id=%s (%d bytes)…", current_id, len(audio)
+                f"🔊 Playing audio (id={current_id}) {len(audio)} bytes…"
             )
             try:
                 if "WSL" in platform.uname().release:
@@ -86,11 +85,11 @@ class OrderedAudioPlayer:
                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp_wav:
                         tmp_wav.write(audio)
                         tmp_wav.flush()
-                        subprocess.run(["paplay", tmp_wav.name],
+                        subprocess.run(["paplay", "--rate=2", tmp_wav.name],
                                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        logger.info("✅ Fallback paplay succeeded for audio id=%s", current_id)
+                        logger.info(f"✅ Fallback paplay succeeded for audio (id={current_id})")
                 except FileNotFoundError:
-                    logger.error("❌ paplay command not found – install pulseaudio-utils to enable fallback")
+                    logger.error("❌ paplay command not found - install pulseaudio-utils to enable fallback")
                 except subprocess.CalledProcessError as sub_exc:
                     logger.error("❌ paplay failed: %s", sub_exc)
-            logger.info("✅ Finished playing audio id=%s", current_id) 
+            logger.info(f"✅ Finished playing audio (id={current_id})") 

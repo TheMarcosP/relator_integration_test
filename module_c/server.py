@@ -1,9 +1,12 @@
 import logging
 from concurrent import futures
+import os
+os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
-from module_c.dummy_text_to_speech import TextToAudio # Update this import with the actual implementation
+from module_c.dummy_text_to_speech import TextToAudio
+# from module_c.text_to_speech import TextToAudio
 
 logging.basicConfig(level=logging.INFO, format="[Module C] %(asctime)s - %(levelname)s - %(message)s")
 
@@ -21,7 +24,7 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
         self.TextToAudio = TextToAudio()
 
     def TextToSpeech(self, request: data_pb2.TextRequest, context):  # noqa: N802
-        logging.info(f"📥 Received text to process (id={request.id}): '{request.text[:30]}…'")
+        logging.info(f"📥 Received text to process (id={request.id})")
         audio_bytes = self.TextToAudio.process(request)
         logging.info(f"➡️  Forwarding audio to Module D … (id={request.id})")
         try:
@@ -32,7 +35,7 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
             msg = response_d.message
         except grpc.RpcError as exc:
             success = False
-            msg = f"❌ Failed to call Module D: {exc.details()}"
+            msg = f"❌ Failed to forward audio to Module D: {exc.details()}"
             logging.error(msg)
         return data_pb2.BasicResponse(id=request.id, success=success, message=msg)
 

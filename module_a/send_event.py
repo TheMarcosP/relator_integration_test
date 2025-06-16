@@ -1,15 +1,11 @@
 import logging
 from functools import partial
 from typing import Dict, Optional
-
 import grpc
-
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
 
-
 logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(levelname)s - %(message)s")
-
 
 class EventSender:
     """Client wrapper responsible for sending events to Module B asynchronously."""
@@ -40,10 +36,9 @@ class EventSender:
             response = future.result()
             status_icon = "✅" if response.success else "❌"
             logging.info(
-                "%s Async response (id=%s): success=%s, msg='%s'",
+                "%s Async response (id=%s): msg='%s'",
                 status_icon,
                 response.id,
-                response.success,
                 response.message,
             )
         except grpc.RpcError as exc:

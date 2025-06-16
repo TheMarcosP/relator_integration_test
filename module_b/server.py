@@ -1,18 +1,17 @@
 import logging
-import random
-import time
 from concurrent import futures
-from typing import Dict
+import os
+os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
-from module_b.dummy_event_to_text import EventToText # Update this import with the actual implementation
+from module_b.dummy_event_to_text import EventToText
+# from module_b.event_to_text import EventToText
 
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "localhost:50051")
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "localhost:50052")
-
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""
@@ -24,13 +23,12 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         logging.info(f"✅ Initialized connection to Module C at {MODULE_C_HOST}")
 
         # Processing component – heavy NLP, can tune delays
-        self.eventToText = EventToText(min_delay=4.0, max_delay=6.0)
+        self.eventToText = EventToText()
 
     def ProcessEvent(self, request: data_pb2.Event, context):  # noqa: N802 (grpc naming)
-        logging.info(f"📥 Received event id={request.id} – sending to processor")
-
+        logging.info(f"📥 Received event (id={request.id})")
         text = self.eventToText.process(request)
-        logging.info(f"➡️  Forwarding text '{text}' (id={request.id}) to Module C")
+        logging.info(f"➡️  Forwarding text (id={request.id}) to Module C")
         try:
             response_c = self._c_stub.TextToSpeech(
                 data_pb2.TextRequest(id=request.id, text=text)
@@ -39,7 +37,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
             msg = response_c.message
         except grpc.RpcError as exc:
             success = False
-            msg = f"❌ Failed to call Module C: {exc.details()}"
+            msg = f"❌ Failed to forward text to Module C: {exc.details()}"
             logging.error(msg)
         return data_pb2.BasicResponse(id=request.id, success=success, message=msg)
 
