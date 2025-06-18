@@ -11,7 +11,7 @@ class EventSender:
     """Client wrapper responsible for sending events to Module B asynchronously."""
 
     def __init__(self, target_host: Optional[str] = None):
-        self.host = target_host or get_env_var("MODULE_B_HOST", "localhost:50051")
+        self.host = target_host or get_env_var("MODULE_B_HOST", "0.0.0.0:50051")
         self._channel = grpc.insecure_channel(self.host)
         self._stub = data_pb2_grpc.ModuleBStub(self._channel)
 

@@ -10,8 +10,8 @@ from module_c.dummy_text_to_speech import TextToAudio
 
 logging.basicConfig(level=logging.INFO, format="[Module C] %(asctime)s - %(levelname)s - %(message)s")
 
-MODULE_C_HOST = get_env_var("MODULE_C_HOST", "localhost:50052")
-MODULE_D_HOST = get_env_var("MODULE_D_HOST", "localhost:50053")
+MODULE_C_HOST = "0.0.0.0:50052"
+MODULE_D_HOST = get_env_var("MODULE_D_HOST", "0.0.0.0:50053")
 
 
 class ModuleCServicer(data_pb2_grpc.ModuleCServicer):

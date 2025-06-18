@@ -10,8 +10,8 @@ from module_b.dummy_event_to_text import EventToText
 
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 
-MODULE_B_HOST = get_env_var("MODULE_B_HOST", "localhost:50051")
-MODULE_C_HOST = get_env_var("MODULE_C_HOST", "localhost:50052")
+MODULE_B_HOST = "0.0.0.0:50051"
+MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50052")
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""

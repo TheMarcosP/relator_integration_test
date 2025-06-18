@@ -9,8 +9,7 @@ from module_d.audio_player import OrderedAudioPlayer
 
 logging.basicConfig(level=logging.INFO, format="[Module D] %(asctime)s - %(levelname)s - %(message)s")
 
-MODULE_D_HOST = get_env_var("MODULE_D_HOST", "localhost:50053")
-
+MODULE_D_HOST = "0.0.0.0:50053"
 
 class ModuleDServicer(data_pb2_grpc.ModuleDServicer):
     def __init__(self):
