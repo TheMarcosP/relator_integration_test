@@ -13,7 +13,7 @@ class EventSender:
     """Client wrapper responsible for sending events to Module B asynchronously."""
 
     def __init__(self, target_host: Optional[str] = None):
-        self.host = target_host or get_env_var("MODULE_B_HOST", "0.0.0.0:50051")
+        self.host = target_host or get_env_var("MODULE_B_HOST", "192.168.0.202:50051")
         logging.info(f"🔌 Attempting connection to Module B at {self.host}")
         
         # Add channel options for better debugging
@@ -24,6 +24,8 @@ class EventSender:
             ('grpc.keepalive_permit_without_calls', 1),
             ('grpc.http2.min_time_between_pings_ms', 10000),
             ('grpc.http2.max_pings_without_data', 0),
+            ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
+            ('grpc.max_receive_message_length', 50 * 1024 * 1024),  # 50MB
         ]
         
         try:
