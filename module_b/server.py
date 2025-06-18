@@ -2,6 +2,7 @@ import logging
 from concurrent import futures
 import os
 import socket
+import netifaces
 os.environ["GRPC_VERBOSITY"] = "DEBUG"  # Enable verbose gRPC logging
 import grpc
 from grpc_interceptor import ServerInterceptor
@@ -12,15 +13,38 @@ from module_b.dummy_event_to_text import EventToText
 
 logging.basicConfig(level=logging.DEBUG, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 
-# Get the WSL IP address
-def get_wsl_ip():
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    logging.info(f"WSL IP address: {ip}")
-    return ip
+def get_ip_address():
+    """Get the IP address that can be reached from other machines."""
+    # Try to get the IP from the eth0 interface first
+    try:
+        addrs = netifaces.ifaddresses('eth0')
+        if netifaces.AF_INET in addrs:
+            ip = addrs[netifaces.AF_INET][0]['addr']
+            logging.info(f"Using eth0 IP address: {ip}")
+            return ip
+    except (ValueError, KeyError):
+        pass
 
-WSL_IP = get_wsl_ip()
-MODULE_B_HOST = f"{WSL_IP}:50051"
+    # Fallback: try all interfaces
+    for interface in netifaces.interfaces():
+        try:
+            addrs = netifaces.ifaddresses(interface)
+            if netifaces.AF_INET in addrs:
+                for addr in addrs[netifaces.AF_INET]:
+                    ip = addr['addr']
+                    # Skip localhost
+                    if not ip.startswith('127.'):
+                        logging.info(f"Using IP address from {interface}: {ip}")
+                        return ip
+        except ValueError:
+            continue
+    
+    # Last resort: use 0.0.0.0
+    logging.warning("Could not find specific IP address, using 0.0.0.0")
+    return "0.0.0.0"
+
+SERVER_IP = get_ip_address()
+MODULE_B_HOST = f"{SERVER_IP}:50051"
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50052")
 
 class ConnectionLoggingInterceptor(ServerInterceptor):
