@@ -1,6 +1,4 @@
-grpcio==1.73.0
-grpcio-tools==1.73.0
+grpcio==1.63.0
+grpcio-tools==1.63.0
 python-dotenv==1.0.1
-simpleaudio==1.0.4
-absl-py==2.0.0
-netifaces==0.11.0 
+simpleaudio==1.0.4 
