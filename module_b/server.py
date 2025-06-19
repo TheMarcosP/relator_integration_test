@@ -3,7 +3,6 @@ from concurrent import futures
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
-from grpc_interceptor import ServerInterceptor
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
 from module_b.dummy_event_to_text import EventToText
@@ -13,12 +12,6 @@ logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(level
 
 MODULE_B_HOST = "0.0.0.0:50051"
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50052")
-
-class ConnectionLoggingInterceptor(ServerInterceptor):
-    def intercept(self, method, request, context, method_name):
-        peer = context.peer()
-        logging.info(f"🔌 New connection from {peer}")
-        return method(request, context)
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""
@@ -50,10 +43,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
 
 
 def serve():
-    server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=10),
-        interceptors=[ConnectionLoggingInterceptor()]
-    )
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleBServicer_to_server(ModuleBServicer(), server)
     server.add_insecure_port(MODULE_B_HOST)
     server.start()

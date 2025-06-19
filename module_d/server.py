@@ -3,20 +3,13 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
-from grpc_interceptor import ServerInterceptor
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
 from module_d.audio_player import OrderedAudioPlayer
 
 logging.basicConfig(level=logging.INFO, format="[Module D] %(asctime)s - %(levelname)s - %(message)s")
 
-MODULE_D_HOST = get_env_var("MODULE_D_HOST", "0.0.0.0:50053")
-
-class ConnectionLoggingInterceptor(ServerInterceptor):
-    def intercept(self, method, request, context, method_name):
-        peer = context.peer()
-        logging.info(f"🔌 New connection from {peer}")
-        return method(request, context)
+MODULE_D_HOST = "0.0.0.0:50053"
 
 class ModuleDServicer(data_pb2_grpc.ModuleDServicer):
     def __init__(self):
@@ -29,10 +22,7 @@ class ModuleDServicer(data_pb2_grpc.ModuleDServicer):
 
 
 def serve():
-    server = grpc.server(
-        ThreadPoolExecutor(max_workers=10),
-        interceptors=[ConnectionLoggingInterceptor()]
-    )
+    server = grpc.server(ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleDServicer_to_server(ModuleDServicer(), server)
     server.add_insecure_port(MODULE_D_HOST)
     server.start()
