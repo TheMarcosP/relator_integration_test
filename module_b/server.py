@@ -1,7 +1,6 @@
 import logging
 from concurrent import futures
 import os
-import socket
 os.environ["GRPC_VERBOSITY"] = "DEBUG"  # Enable verbose gRPC logging
 import grpc
 from grpc_interceptor import ServerInterceptor
@@ -12,15 +11,7 @@ from module_b.dummy_event_to_text import EventToText
 
 logging.basicConfig(level=logging.DEBUG, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 
-# Get the WSL IP address
-def get_wsl_ip():
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    logging.info(f"WSL IP address: {ip}")
-    return ip
-
-WSL_IP = get_wsl_ip()
-MODULE_B_HOST = f"{WSL_IP}:50051"
+MODULE_B_HOST = "0.0.0.0:50051"
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50052")
 
 class ConnectionLoggingInterceptor(ServerInterceptor):
