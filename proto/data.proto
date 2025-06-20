@@ -8,14 +8,14 @@ message Event {
   map<string, string> data = 2;
 }
 
-// Text request sent from Module B to Module C
-message TextRequest {
+// Text sent from Module B to Module C
+message Comment {
   string id = 1;
   string text = 2;
 }
 
-// Audio request sent from Module C to Module D
-message AudioRequest {
+// Audio sent from Module C to Module D
+message Audio {
   string id = 1;
   bytes audio_data = 2;
 }
@@ -34,10 +34,10 @@ service ModuleB {
 
 // Service run by Module C
 service ModuleC {
-  rpc TextToSpeech(TextRequest) returns (BasicResponse);
+  rpc TextToSpeech(Comment) returns (BasicResponse);
 }
 
 // Service run by Module D
 service ModuleD {
-  rpc PlayAudio(AudioRequest) returns (BasicResponse);
+  rpc PlayAudio(Audio) returns (BasicResponse);
 } 

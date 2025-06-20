@@ -22,13 +22,13 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
         # processing component
         self.TextToAudio = TextToAudio()
 
-    def TextToSpeech(self, request: data_pb2.TextRequest, context):  # noqa: N802
+    def TextToSpeech(self, request: data_pb2.Comment, context):  # noqa: N802
         logging.info(f"📥 Received text to process (id={request.id})")
         audio_bytes = self.TextToAudio.process(request)
         logging.info(f"➡️  Forwarding audio to Module D … (id={request.id})")
         try:
             response_d = self._d_stub.PlayAudio(
-                data_pb2.AudioRequest(id=request.id, audio_data=audio_bytes)
+                data_pb2.Audio(id=request.id, audio_data=audio_bytes)
             )
             success = response_d.success
             msg = response_d.message

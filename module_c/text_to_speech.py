@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class TextToAudio:
     """TTS model wrapper to synthesize audio from text comment about the game"""
 
-    def process(self, text_request: data_pb2.TextRequest) -> bytes:
+    def process(self, text_request: data_pb2.Comment) -> bytes:
         """Return raw bytes of a short WAV clip bundled with the module."""
 
         return audio_bytes

@@ -23,7 +23,7 @@ class ModuleDServicer(data_pb2_grpc.ModuleDServicer):
             logging.error(f"❌ Failed to initialize OrderedAudioPlayer: {e}")
             raise
 
-    def PlayAudio(self, request: data_pb2.AudioRequest, context):  # noqa: N802
+    def PlayAudio(self, request: data_pb2.Audio, context):  # noqa: N802
         try:
             logging.info(f"📥 Received audio request (id={request.id}, data_size={len(request.audio_data)} bytes)")
             logging.info(f"🔍 Client address: {context.peer()}")

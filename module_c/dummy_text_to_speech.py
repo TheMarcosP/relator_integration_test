@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class TextToAudio:
     """Simulates text-to-speech synthesis and returns dummy audio bytes."""
 
-    def process(self, text_request: data_pb2.TextRequest) -> bytes:
+    def process(self, text_request: data_pb2.Comment) -> bytes:
         """Return raw bytes of a short WAV clip bundled with the module.
 
         This keeps the example self-contained while allowing Module D to

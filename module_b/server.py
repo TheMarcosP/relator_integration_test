@@ -31,7 +31,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         logging.info(f"➡️  Forwarding text (id={request.id}) to Module C")
         try:
             response_c = self._c_stub.TextToSpeech(
-                data_pb2.TextRequest(id=request.id, text=text)
+                data_pb2.Comment(id=request.id, text=text)
             )
             success = response_c.success
             msg = response_c.message

@@ -112,7 +112,7 @@ class ModuleCStub(object):
         """
         self.TextToSpeech = channel.unary_unary(
                 '/pipeline.ModuleC/TextToSpeech',
-                request_serializer=data__pb2.TextRequest.SerializeToString,
+                request_serializer=data__pb2.Comment.SerializeToString,
                 response_deserializer=data__pb2.BasicResponse.FromString,
                 _registered_method=True)
 
@@ -132,7 +132,7 @@ def add_ModuleCServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'TextToSpeech': grpc.unary_unary_rpc_method_handler(
                     servicer.TextToSpeech,
-                    request_deserializer=data__pb2.TextRequest.FromString,
+                    request_deserializer=data__pb2.Comment.FromString,
                     response_serializer=data__pb2.BasicResponse.SerializeToString,
             ),
     }
@@ -162,7 +162,7 @@ class ModuleC(object):
             request,
             target,
             '/pipeline.ModuleC/TextToSpeech',
-            data__pb2.TextRequest.SerializeToString,
+            data__pb2.Comment.SerializeToString,
             data__pb2.BasicResponse.FromString,
             options,
             channel_credentials,
@@ -187,7 +187,7 @@ class ModuleDStub(object):
         """
         self.PlayAudio = channel.unary_unary(
                 '/pipeline.ModuleD/PlayAudio',
-                request_serializer=data__pb2.AudioRequest.SerializeToString,
+                request_serializer=data__pb2.Audio.SerializeToString,
                 response_deserializer=data__pb2.BasicResponse.FromString,
                 _registered_method=True)
 
@@ -207,7 +207,7 @@ def add_ModuleDServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'PlayAudio': grpc.unary_unary_rpc_method_handler(
                     servicer.PlayAudio,
-                    request_deserializer=data__pb2.AudioRequest.FromString,
+                    request_deserializer=data__pb2.Audio.FromString,
                     response_serializer=data__pb2.BasicResponse.SerializeToString,
             ),
     }
@@ -237,7 +237,7 @@ class ModuleD(object):
             request,
             target,
             '/pipeline.ModuleD/PlayAudio',
-            data__pb2.AudioRequest.SerializeToString,
+            data__pb2.Audio.SerializeToString,
             data__pb2.BasicResponse.FromString,
             options,
             channel_credentials,
