@@ -5,6 +5,7 @@ import grpc
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
 
+logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S,%f"[:-3])
 logger = logging.getLogger(__name__)
 
 class EventSender:

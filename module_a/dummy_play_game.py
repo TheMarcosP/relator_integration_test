@@ -19,9 +19,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl import app
-from absl import flags
-from absl import logging
 import time
 import json
 import logging
@@ -30,36 +27,22 @@ from gfootball.env import football_env
 from module_a.parse_observation_utils import parse_observation # our function to parse the observation
 from module_a.send_event import EventSender # object to send events
 
-FLAGS = flags.FLAGS
+logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S,%f"[:-3])
+logger = logging.getLogger(__name__)
 
-flags.DEFINE_string(
-    'players', 'bot:left_players=1;bot:right_players=1',
-    'Both teams controlled by built-in AI'
-)
-flags.DEFINE_string('level', '', 'Level to play')
-flags.DEFINE_enum('action_set', 'full', ['default', 'full'], 'Action set')
-flags.DEFINE_bool('real_time', True, 'AI vs AI does not need real time')
-flags.DEFINE_bool('render', True, 'Disable rendering for speed')
-
-logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(levelname)s - %(message)s")
-
-
-def main(_):
-  players = FLAGS.players.split(';') if FLAGS.players else ''
-  assert not (any(['agent' in player for player in players])
-             ), ('Player type \'agent\' can not be used with play_game.')
+def main():
+  # Default configuration
+  players = 'bot:left_players=1;bot:right_players=1'
   cfg_values = {
-      'action_set': FLAGS.action_set,
+      'action_set': 'full',
       'dump_full_episodes': True,
-      'players': players,
-      'real_time': FLAGS.real_time,
+      'players': players.split(';'),
+      'real_time': True,
   }
-  if FLAGS.level:
-    cfg_values['level'] = FLAGS.level
+  
   cfg = config.Config(cfg_values)
   env = football_env.FootballEnv(cfg)
-  if FLAGS.render:
-    env.render()
+  env.render()
   env.reset()
 
   obs = env.reset()
@@ -73,9 +56,9 @@ def main(_):
 
       try:
           summary = parse_observation(next_obs) # (3) PARSE OBSERVATION
-          logging.info(f"✅ Observation Summary for (id={step}):\n{json.dumps(summary, indent=4)}")
+          logger.info(f"✅ Observation Summary for (id={step}):\n{json.dumps(summary, indent=4)}")
       except Exception as e:
-          logging.error(f"❌ Could not parse observation: {e}")
+          logger.error(f"❌ Could not parse observation: {e}")
       
       try:
         # check the type of each key and value in summary if its not a str cast it to str (for grpc)
@@ -83,12 +66,12 @@ def main(_):
           if not isinstance(value, str):
             summary[key] = str(value)
         sender.send_async(str(step), summary) # (4) SEND EVENT (id, data)
-        logging.info(f"✅ Sent event (id={step})")
+        logger.info(f"✅ Sent event (id={step})")
       except Exception as e:
-        logging.error(f"❌ Failed to send event: {e}")
+        logger.error(f"❌ Failed to send event: {e}")
 
       # Delay to make it readable
-      time.sleep(10)
+      time.sleep(2)
 
       # Prepare next iter
       obs = next_obs
@@ -100,10 +83,10 @@ def main(_):
         step = 0
 
   except KeyboardInterrupt:
-    logging.warning('Game stopped, writing dump...')
+    logger.warning('Game stopped, writing dump...')
     env.write_dump('shutdown')
     exit(1)
 
 
 if __name__ == '__main__':
-  app.run(main)
+  main()
