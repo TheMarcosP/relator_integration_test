@@ -9,7 +9,7 @@ class EventToText:
     """NLP processing: converts events to a comment about the game"""
 
     def __init__(self):
-        # state to keep the client, chat and so on
+        # state to keep the LLM client, chat and so on
         pass
 
     def process(self, event: data_pb2.Event) -> str:

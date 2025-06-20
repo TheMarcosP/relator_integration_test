@@ -5,13 +5,13 @@ import grpc
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
 
-logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class EventSender:
     """Client wrapper responsible for sending events to Module B asynchronously."""
 
     def __init__(self, target_host: Optional[str] = None):
-        self.host = target_host or get_env_var("MODULE_B_HOST", "0.0.0.0:50051")
+        self.host = target_host or get_env_var("MODULE_B_HOST", "0.0.0.0:50052")
         self._channel = grpc.insecure_channel(self.host)
         self._stub = data_pb2_grpc.ModuleBStub(self._channel)
 
@@ -35,11 +35,11 @@ class EventSender:
         try:
             response = future.result()
             status_icon = "✅" if response.success else "❌"
-            logging.info(
+            logger.info(
                 "%s Async response (id=%s): msg='%s'",
                 status_icon,
                 response.id,
                 response.message,
             )
         except grpc.RpcError as exc:
-            logging.error("❌ Async call for id=%s failed: %s", event_id, exc)
+            logger.error("❌ Async call for id=%s failed: %s", event_id, exc)

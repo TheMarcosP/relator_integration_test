@@ -8,7 +8,9 @@ logger = logging.getLogger(__name__)
 # Create a similar class for the actual implementation
 # Then update the import in the server.py file
 class EventToText:
-    """Simulates heavy NLP processing in Module B and converts event to text."""
+    """Simulates heavy NLP processing, converts event to text.
+    This is a dummy implementation for testing purposes.
+    """
 
     def __init__(self, min_delay: float = 0.5, max_delay: float = 2.0):
         self.min_delay = min_delay

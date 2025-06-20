@@ -27,7 +27,7 @@ import json
 import logging
 from gfootball.env import config
 from gfootball.env import football_env
-from module_a.parse_observation import parse_observation # our function to parse the observation
+from module_a.parse_observation_utils import parse_observation # our function to parse the observation
 from module_a.send_event import EventSender # object to send events
 
 FLAGS = flags.FLAGS
@@ -41,7 +41,8 @@ flags.DEFINE_enum('action_set', 'full', ['default', 'full'], 'Action set')
 flags.DEFINE_bool('real_time', True, 'AI vs AI does not need real time')
 flags.DEFINE_bool('render', True, 'Disable rendering for speed')
 
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(levelname)s - %(message)s")
+
 
 def main(_):
   players = FLAGS.players.split(';') if FLAGS.players else ''
@@ -72,9 +73,9 @@ def main(_):
 
       try:
           summary = parse_observation(next_obs) # (3) PARSE OBSERVATION
-          logger.info(f"✅ Observation Summary for (id={step}):\n{json.dumps(summary, indent=4)}")
+          logging.info(f"✅ Observation Summary for (id={step}):\n{json.dumps(summary, indent=4)}")
       except Exception as e:
-          logger.error(f"❌ Could not parse observation: {e}")
+          logging.error(f"❌ Could not parse observation: {e}")
       
       try:
         # check the type of each key and value in summary if its not a str cast it to str (for grpc)
@@ -82,7 +83,7 @@ def main(_):
           if not isinstance(value, str):
             summary[key] = str(value)
         sender.send_async(str(step), summary) # (4) SEND EVENT (id, data)
-        logger.info(f"✅ Sent event (id={step})")
+        logging.info(f"✅ Sent event (id={step})")
       except Exception as e:
         logging.error(f"❌ Failed to send event: {e}")
 
