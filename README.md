@@ -61,7 +61,7 @@ To allow your gRPC server running inside WSL to be accessed from Windows, follow
 Open PowerShell **as Administrator** and run:
 
 ```powershell
-New-NetFirewallRule -DisplayName "Allow WSL Server" -Direction Inbound -LocalPort 50051,50052,50053 -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "Allow WSL Server" -Direction Inbound -LocalPort 50052,50053,50054 -Protocol TCP -Action Allow
 ```
 
 This creates a firewall rule allowing inbound TCP connections on the specified ports.
@@ -90,9 +90,10 @@ Windows needs to forward traffic to the WSL IP. Do the following:
    For example:
 
    ```powershell
-   netsh interface portproxy add v4tov4 listenport=50051 listenaddress=0.0.0.0 connectport=50051 connectaddress=172.31.234.193
+   netsh interface portproxy add v4tov4 listenport=50052 listenaddress=0.0.0.0 connectport=50052 connectaddress=172.30.66.160
    ```
 
+    Restart PC after setting up the port forwarding to ensure it takes effect.
 ---
 
 You can check existing rules with:
