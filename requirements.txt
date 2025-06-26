@@ -1,4 +1,7 @@
 grpcio==1.63.0
 grpcio-tools==1.63.0
 python-dotenv==1.0.1
-simpleaudio==1.0.4 
+simpleaudio==1.0.4
+fastapi==0.115.12
+uvicorn==0.34.3
+requests==2.32.3 
