@@ -3,16 +3,47 @@ Discovery Server MVP - FastAPI-based service registry
 Acts as an online dictionary where modules can register and discover each other
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 import logging
 from typing import Dict, Optional
 import uvicorn
+import os
 from scripts.logging_config import setup_logging
+from scripts.utils import get_env_var
 
 # Configure logging
 setup_logging()
 logger = logging.getLogger("Discovery Server")
+
+# Security setup
+security = HTTPBearer()
+
+def get_api_key() -> str:
+    """Get API key from environment variables"""
+    api_key = get_env_var("DISCOVERY_API_KEY", None)
+    if not api_key:
+        raise ValueError("DISCOVERY_API_KEY environment variable must be set")
+    return api_key
+
+def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)) -> bool:
+    """Verify the provided API key"""
+    try:
+        api_key = get_api_key()
+        if credentials.credentials != api_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid API key",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return True
+    except ValueError as e:
+        logger.error(f"Authentication configuration error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication not properly configured"
+        )
 
 app = FastAPI(title="Relator Discovery Service", version="1.0.0")
 
@@ -34,11 +65,11 @@ class ServiceRegistration(BaseModel):
 
 @app.get("/")
 def root():
-    """Health check endpoint"""
+    """Health check endpoint (public - no auth required)"""
     return {"status": "Discovery Service is running", "registered_services": len(services_registry)}
 
 @app.post("/register")
-def register_service(registration: ServiceRegistration):
+def register_service(registration: ServiceRegistration, _: bool = Depends(verify_api_key)):
     """
     Register a service in the discovery registry
     
@@ -66,7 +97,7 @@ def register_service(registration: ServiceRegistration):
     }
 
 @app.get("/discover/{service_name}")
-def discover_service(service_name: str):
+def discover_service(service_name: str, _: bool = Depends(verify_api_key)):
     """
     Discover a service by name
     
@@ -92,7 +123,7 @@ def discover_service(service_name: str):
     }
 
 @app.get("/services")
-def list_services():
+def list_services(_: bool = Depends(verify_api_key)):
     """
     List all registered services
     
@@ -106,7 +137,7 @@ def list_services():
     }
 
 @app.delete("/unregister/{service_name}")
-def unregister_service(service_name: str):
+def unregister_service(service_name: str, _: bool = Depends(verify_api_key)):
     """
     Unregister a service from the registry
     

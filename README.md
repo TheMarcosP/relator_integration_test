@@ -23,6 +23,7 @@ The system now includes a **FastAPI-based service discovery service** that elimi
 - **Graceful shutdown** with automatic service unregistration
 - **Simplified networking** with explicit IP control via `SERVICE_HOST_IP`
 - **Clean logging** with module identification and verbosity control
+- **🔒 API Key Authentication** to prevent unauthorized access and spam
 
 ---
 ## 1. Quick Start
@@ -42,8 +43,10 @@ The system now includes a **FastAPI-based service discovery service** that elimi
 
 3.  Configure discovery (copy and modify env.example):
     ```bash
-    cp env.example .env
-    # Edit .env to set DISCOVERY_HOST if running on a different machine
+    cp .env.example .env
+    # Edit .env to set:
+    # - DISCOVERY_URL: where the discovery server is running
+    # - DISCOVERY_API_KEY: secure API key for authentication
     ```
 
 4.  Start the services (all now use discovery):
@@ -104,6 +107,18 @@ python test_discovery.py
 
 This will demonstrate service registration, discovery, listing, and unregistration.
 
+### Testing Authentication
+
+Verify that API key authentication is working correctly:
+
+```bash
+# Set your API key and test authentication
+export DISCOVERY_API_KEY=your-api-key-here
+python -m scripts.test_auth
+```
+
+This will test both authenticated and unauthenticated requests to ensure security is working.
+
 ---
 ## 2. Service Discovery System
 
@@ -115,19 +130,39 @@ The discovery service acts as an **online dictionary** where:
 
 ### Discovery API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Health check and registry status |
-| `POST` | `/register` | Register a service |
-| `GET` | `/discover/{name}` | Discover a service by name |
-| `GET` | `/services` | List all registered services |
-| `DELETE` | `/unregister/{name}` | Unregister a service |
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| `GET` | `/` | Health check and registry status | ❌ Public |
+| `POST` | `/register` | Register a service | ✅ API Key Required |
+| `GET` | `/discover/{name}` | Discover a service by name | ✅ API Key Required |
+| `GET` | `/services` | List all registered services | ✅ API Key Required |
+| `DELETE` | `/unregister/{name}` | Unregister a service | ✅ API Key Required |
+
+### 🔒 Authentication
+
+The discovery server uses **Bearer token authentication** with API keys to prevent unauthorized access:
+
+- **Health check endpoint** (`/`) is public and requires no authentication
+- **All other endpoints** require a valid API key in the `Authorization` header
+- API keys are configured via the `DISCOVERY_API_KEY` environment variable
+- Include the API key as: `Authorization: Bearer your-api-key-here`
+
+**Security Benefits:**
+- Prevents spam and unauthorized service registrations
+- Protects against malicious service discovery attempts  
+- Secures service unregistration from unauthorized users
+- Allows monitoring of legitimate vs unauthorized access attempts
+
+
 
 ### CLI Tool
 
 Test the discovery service using the built-in CLI:
 
 ```bash
+# Set your API key first (required for all operations)
+export DISCOVERY_API_KEY=your-secure-api-key
+
 # Register a service
 python -m discovery.cli register my_service 8080 --metadata '{"version": "1.0"}'
 
@@ -144,7 +179,7 @@ python -m discovery.cli endpoint my_service
 python -m discovery.cli unregister my_service
 
 # Use remote discovery server
-python -m discovery.cli --discovery-host 192.168.1.100 list
+python -m discovery.cli --discovery-url http://192.168.1.100:8000 list
 ```
 
 ### Environment Variables
@@ -152,6 +187,7 @@ python -m discovery.cli --discovery-host 192.168.1.100 list
 **Discovery Configuration:**
 ```bash
 DISCOVERY_HOST=localhost        # Discovery server location  
+DISCOVERY_API_KEY=your-api-key  # API key for discovery server authentication
 SERVICE_HOST_IP=192.168.1.100   # Override auto-detected IP (optional)
 ```
 

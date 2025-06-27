@@ -16,6 +16,17 @@ class DiscoveryError(Exception):
     """Custom exception for discovery service errors"""
     pass
 
+def get_auth_headers() -> Dict[str, str]:
+    """Get authentication headers with API key"""
+    api_key = get_env_var("DISCOVERY_API_KEY", None)
+    if not api_key:
+        raise DiscoveryError("DISCOVERY_API_KEY environment variable must be set")
+    
+    return {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
 def register_service(
     service_name: str,
     service_host: str,
@@ -48,9 +59,11 @@ def register_service(
     }
     
     try:
+        headers = get_auth_headers()
         response = requests.post(
             f"{discovery_url}/register",
             json=registration_data,
+            headers=headers,
             timeout=10
         )
         response.raise_for_status()
@@ -84,8 +97,10 @@ def discover_service(
     discovery_url = get_env_var("DISCOVERY_URL", None)
     
     try:
+        headers = get_auth_headers()
         response = requests.get(
             f"{discovery_url}/discover/{service_name}",
+            headers=headers,
             timeout=10
         )
         response.raise_for_status()
@@ -143,8 +158,10 @@ def list_all_services(
         DiscoveryError: If request fails
     """
     try:
+        headers = get_auth_headers()
         response = requests.get(
             f"{discovery_url}/services",
+            headers=headers,
             timeout=10
         )
         response.raise_for_status()
@@ -176,8 +193,10 @@ def unregister_service(
     """
 
     try:
+        headers = get_auth_headers()
         response = requests.delete(
             f"{discovery_url}/unregister/{service_name}",
+            headers=headers,
             timeout=10
         )
         response.raise_for_status()

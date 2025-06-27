@@ -21,10 +21,10 @@ def cmd_register(args):
     """Register a service"""
     try:
         result = register_service(
-            discovery_url=args.discovery_url,
             service_name=args.name,
             service_host=args.host,
             service_port=args.port,
+            discovery_url=args.discovery_url,
             metadata=json.loads(args.metadata) if args.metadata else None,
         )
         print(f"✅ {result['message']}")
@@ -134,6 +134,14 @@ def main():
     if args.command is None:
         parser.print_help()
         sys.exit(1)
+    
+    # Check if API key is set before proceeding with authenticated commands
+    if args.command != "help":
+        api_key = get_env_var("DISCOVERY_API_KEY", None)
+        if not api_key:
+            print("❌ Error: DISCOVERY_API_KEY environment variable must be set")
+            print("   Please set your API key: export DISCOVERY_API_KEY=your_api_key_here")
+            sys.exit(1)
     
     args.func(args)
 
