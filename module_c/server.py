@@ -5,10 +5,10 @@ os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
 from scripts.utils import get_env_var
 from proto import data_pb2, data_pb2_grpc
-from module_c.dummy_text_to_speech import TextToAudio
-# from module_c.text_to_speech import TextToAudio
+# from module_c.dummy_text_to_speech import TextToAudio
+from module_c.text_to_speech import TextToAudio
 
-logging.basicConfig(level=logging.INFO, format="[Module C] %(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.DEBUG, format="[Module C] %(asctime)s - %(levelname)s - %(message)s")
 
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50053")
 MODULE_D_HOST = get_env_var("MODULE_D_HOST", "0.0.0.0:50054")
@@ -21,14 +21,19 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
 
         # processing component
         self.TextToAudio = TextToAudio()
+        self._audio_counter = 0          # new
+
 
     def TextToSpeech(self, request: data_pb2.Comment, context):  # noqa: N802
         logging.info(f"📥 Received text to process (id={request.id})")
         audio_bytes = self.TextToAudio.process(request)
-        logging.info(f"➡️  Forwarding audio to Module D … (id={request.id})")
+        # assign monotonic integer so Module D never needs to remap
+        audio_id = str(self._audio_counter)
+        self._audio_counter += 1
+        logging.info(f"➡️  Forwarding audio to Module D … (audio_id={audio_id})")        
         try:
             response_d = self._d_stub.PlayAudio(
-                data_pb2.Audio(id=request.id, audio_data=audio_bytes)
+                data_pb2.Audio(id=audio_id, audio_data=audio_bytes)
             )
             success = response_d.success
             msg = response_d.message

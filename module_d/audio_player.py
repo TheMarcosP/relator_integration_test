@@ -33,8 +33,17 @@ class OrderedAudioPlayer:
         try:
             audio_id = int(req_id)
         except ValueError:
-            logger.warning("Received non-integer id '%s', playing immediately", req_id)
-            audio_id = self._next_id  # best effort
+            # map UUID → next sequential integer so the worker thread never blocks
+            with self._lock:
+                highest = (
+                    max(self._pending.keys(), default=-1)
+                    if self._next_id is None
+                    else max(self._next_id - 1, *self._pending.keys(), default=-1)
+                )
+            audio_id = highest + 1
+            logger.warning(
+                "Received non-integer id '%s' → remapped to %s", req_id, audio_id
+            )
         with self._not_empty:
             # record first id as the starting point
             if self._next_id is None:
