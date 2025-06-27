@@ -15,18 +15,17 @@ from discovery.client import (
     unregister_service,
     DiscoveryError
 )
-from scripts.discovery_utils import get_local_ip
+from scripts.utils import get_env_var
 
 def cmd_register(args):
     """Register a service"""
     try:
         result = register_service(
-            discovery_host=args.discovery_host,
+            discovery_url=args.discovery_url,
             service_name=args.name,
-            service_host=args.host or get_local_ip(),
+            service_host=args.host,
             service_port=args.port,
             metadata=json.loads(args.metadata) if args.metadata else None,
-            discovery_port=args.discovery_port
         )
         print(f"✅ {result['message']}")
         print(f"   Endpoint: {result['endpoint']}")
@@ -38,9 +37,8 @@ def cmd_discover(args):
     """Discover a service"""
     try:
         result = discover_service(
-            discovery_host=args.discovery_host,
+            discovery_url=args.discovery_url,
             service_name=args.name,
-            discovery_port=args.discovery_port
         )
         print(f"🔍 Service '{args.name}' found:")
         print(f"   Endpoint: {result['endpoint']}")
@@ -56,9 +54,8 @@ def cmd_endpoint(args):
     """Get service endpoint"""
     try:
         endpoint = get_service_endpoint(
-            discovery_host=args.discovery_host,
+            discovery_url=args.discovery_url,
             service_name=args.name,
-            discovery_port=args.discovery_port
         )
         print(endpoint)
     except DiscoveryError as e:
@@ -69,8 +66,7 @@ def cmd_list(args):
     """List all services"""
     try:
         result = list_all_services(
-            discovery_host=args.discovery_host,
-            discovery_port=args.discovery_port
+            discovery_url=args.discovery_url,
         )
         print(f"📋 Found {result['count']} registered services:")
         if result['services']:
@@ -88,9 +84,8 @@ def cmd_unregister(args):
     """Unregister a service"""
     try:
         result = unregister_service(
-            discovery_host=args.discovery_host,
+            discovery_url=args.discovery_url,
             service_name=args.name,
-            discovery_port=args.discovery_port
         )
         print(f"🗑️  {result['message']}")
     except DiscoveryError as e:
@@ -100,15 +95,9 @@ def cmd_unregister(args):
 def main():
     parser = argparse.ArgumentParser(description="Discovery Service CLI Tool")
     parser.add_argument(
-        "--discovery-host", 
-        default="localhost", 
-        help="Discovery server host (default: localhost)"
-    )
-    parser.add_argument(
-        "--discovery-port", 
-        type=int, 
-        default=8000, 
-        help="Discovery server port (default: 8000)"
+        "--discovery-url", 
+        default= get_env_var("DISCOVERY_URL", "http://localhost:8000"),
+        help=f"Discovery server URL (default: env var DISCOVERY_URL or http://localhost:8000)"
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

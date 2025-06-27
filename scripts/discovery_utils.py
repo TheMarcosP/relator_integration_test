@@ -3,15 +3,64 @@ Discovery integration utilities
 Provides functions for service registration and discovery
 """
 
-import os
 import signal
-import sys
-from dotenv import load_dotenv
-from discovery.client import get_service_endpoint, DiscoveryError
+from discovery.client import get_service_endpoint, DiscoveryError, register_service, unregister_service
 import logging
 import socket
+from scripts.utils import get_env_var
+import os
+import grpc
 
 logger = logging.getLogger("Discovery Utils")
+
+
+def start_grpc_server_with_discovery(
+    server : grpc.server,
+    service_name: str, 
+    host_address: str,
+    metadata: dict = None
+):
+    """
+    Start a gRPC server with automatic discovery registration and graceful shutdown
+    
+    Args:
+        server: gRPC server instance
+        service_name: Name to register the service as
+        host: Host address in "host:port" format
+        metadata: Optional metadata for the service
+    """
+    # Add server port
+    service_host = host_address.split(":")[0]
+    service_port = extract_port_from_host(host_address)
+    server.add_insecure_port(f"{service_host}:{service_port}")
+    auto_register_service(
+        service_name=service_name,
+        service_host=service_host,
+        service_port=service_port,
+        metadata=metadata or {}
+    )
+    
+    # Setup graceful shutdown
+    setup_graceful_shutdown(server, service_name)
+    
+    # Start server
+    server.start()
+    logger.info(f"📡 {service_name} gRPC server listening on {service_host}:{service_port}")
+    
+    try:
+        server.wait_for_termination()
+    except KeyboardInterrupt:
+        # Signal handler will take care of cleanup
+        logger.info("🔄 Received KeyboardInterrupt, letting signal handler manage shutdown")
+    except Exception as e:
+        logger.error(f"❌ Server error: {e}")
+        # Cleanup and exit
+        try:
+            unregister_service(service_name)
+        except:
+            pass
+        os._exit(1) 
+
 
 def get_service_endpoint_from_discovery(service_name: str) -> str:
     """
@@ -26,8 +75,7 @@ def get_service_endpoint_from_discovery(service_name: str) -> str:
     Raises:
         DiscoveryError: If service discovery fails
     """
-    discovery_host = get_discovery_host()
-    endpoint = get_service_endpoint(discovery_host, service_name)
+    endpoint = get_service_endpoint(service_name)
     logger.debug(f"🔍 Found {service_name} via discovery: {endpoint}")
     return endpoint
 
@@ -43,29 +91,20 @@ def auto_register_service(
     Args:
         service_name: Name to register the service as
         service_port: Port the service is running on
-        service_host: Host the service is running on (auto-detected if None)
+        discovery_url: URL of the discovery server
         metadata: Optional metadata to include
     
     Returns:
         True if registration successful, False otherwise
     """
     try:
-        discovery_host = get_discovery_host()
-        
-        # Auto-detect service host if not provided
-        if service_host is None:
-            service_host = get_local_ip()
-            
-        from discovery.client import register_service
         result = register_service(
-            discovery_host=discovery_host,
             service_name=service_name,
-            service_host=service_host,
+            service_host=service_host,  
             service_port=service_port,
             metadata=metadata
         )
-        
-        logger.info(f"✅ Registered {service_name} at {service_host}:{service_port}")
+        logger.info(f"✅ Registered {service_name} at {service_host}:{service_port} to discovery server at {get_env_var('DISCOVERY_URL', 'http://localhost:8000')}")
         return True
         
     except Exception as e:
@@ -116,9 +155,7 @@ def setup_graceful_shutdown(server, service_name: str = None):
         # Unregister from discovery service if service name provided
         if service_name:
             try:
-                from discovery.client import unregister_service
-                discovery_host = get_discovery_host()
-                unregister_service(discovery_host, service_name)
+                unregister_service(service_name)
                 logger.info("✅ Unregistered from discovery service")
             except Exception as e:
                 logger.error(f"❌ Failed to unregister from discovery service: {e}")
@@ -131,7 +168,6 @@ def setup_graceful_shutdown(server, service_name: str = None):
             logger.error(f"❌ Error stopping server: {e}")
         
         # Force exit after cleanup
-        import os
         os._exit(0)
     
     # Setup signal handlers
@@ -140,63 +176,6 @@ def setup_graceful_shutdown(server, service_name: str = None):
     
     return graceful_shutdown
 
-def start_grpc_server_with_discovery(
-    server, 
-    service_name: str, 
-    host: str, 
-    metadata: dict = None
-):
-    """
-    Start a gRPC server with automatic discovery registration and graceful shutdown
-    
-    Args:
-        server: gRPC server instance
-        service_name: Name to register the service as
-        host: Host address in "host:port" format
-        metadata: Optional metadata for the service
-    """
-    # Add server port
-    server.add_insecure_port(host)
-    
-    # Register with discovery service
-    service_port = extract_port_from_host(host)
-    auto_register_service(
-        service_name=service_name,
-        service_port=service_port,
-        metadata=metadata or {}
-    )
-    
-    # Setup graceful shutdown
-    setup_graceful_shutdown(server, service_name)
-    
-    # Start server
-    server.start()
-    logger.info(f"📡 {service_name} gRPC server listening on {host}")
-    
-    try:
-        server.wait_for_termination()
-    except KeyboardInterrupt:
-        # Signal handler will take care of cleanup
-        logger.info("🔄 Received KeyboardInterrupt, letting signal handler manage shutdown")
-    except Exception as e:
-        logger.error(f"❌ Server error: {e}")
-        # Cleanup and exit
-        try:
-            from discovery.client import unregister_service
-            discovery_host = get_env_var("DISCOVERY_HOST", "localhost")
-            unregister_service(discovery_host, service_name)
-        except:
-            pass
-        import os
-        os._exit(1) 
-
-def get_env_var(name: str, default: str) -> str:
-    """
-    Get an environment variable with a default value.
-    Reloads environment variables from .env file each time.
-    """
-    load_dotenv(override=True)  # Reload environment variables
-    return os.getenv(name, default)
 
 def get_local_ip() -> str:
     """
@@ -208,7 +187,7 @@ def get_local_ip() -> str:
         str: The IP address to use for service registration
     """
     # Check for environment override
-    override_ip = os.getenv("SERVICE_HOST_IP")
+    override_ip = get_env_var("SERVICE_HOST_IP", "localhost")
     if override_ip:
         logger.info(f"Using SERVICE_HOST_IP: {override_ip}")
         return override_ip
@@ -227,11 +206,4 @@ def get_local_ip() -> str:
         logger.info("💡 Set SERVICE_HOST_IP environment variable for reliable cross-machine communication")
         return "127.0.0.1"
     
-def get_discovery_host() -> str:
-    """
-    Get the discovery server host from environment variables
     
-    Returns:
-        Discovery server host (defaults to localhost)
-    """
-    return get_env_var("DISCOVERY_HOST", "localhost")

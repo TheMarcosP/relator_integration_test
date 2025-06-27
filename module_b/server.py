@@ -16,7 +16,7 @@ from module_b.dummy_event_to_text import EventToText
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 SERVICE_NAME = "module_b"
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "0.0.0.0:50052")
-MODULE_C_HOST = get_service_endpoint_from_discovery("module_c")
+MODULE_C_HOST = get_env_var("MODULE_C_HOST") or get_service_endpoint_from_discovery("module_c")
 
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
@@ -55,7 +55,7 @@ def serve():
     start_grpc_server_with_discovery(
         server=server,
         service_name=SERVICE_NAME,
-        host=MODULE_B_HOST,
+        host_address=MODULE_B_HOST,
         metadata={
             "version": "1.0.0",
             "type": "event_processor",

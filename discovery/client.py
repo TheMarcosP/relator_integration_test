@@ -5,7 +5,7 @@ Discovery Client SDK - Functions for service registration and discovery
 import requests
 import logging
 from typing import Optional, Dict
-import socket
+from scripts.utils import get_env_var
 
 # Configure logging
 logger = logging.getLogger("Discovery Client")
@@ -17,23 +17,21 @@ class DiscoveryError(Exception):
     pass
 
 def register_service(
-    discovery_host: str,
     service_name: str,
     service_host: str,
     service_port: int,
+    discovery_url: str = get_env_var("DISCOVERY_URL", None),
     metadata: Optional[Dict] = None,
-    discovery_port: int = 8000
 ) -> Dict:
     """
     Register a service with the discovery server
     
     Args:
-        discovery_host: IP/hostname of the discovery server
+        discovery_url: URL of the discovery server
         service_name: Name of the service to register
         service_host: IP/hostname where the service is running
         service_port: Port where the service is listening
         metadata: Optional metadata dictionary
-        discovery_port: Port of the discovery server (default: 8000)
     
     Returns:
         Response from the discovery server
@@ -41,7 +39,6 @@ def register_service(
     Raises:
         DiscoveryError: If registration fails
     """
-    discovery_url = f"http://{discovery_host}:{discovery_port}"
     
     registration_data = {
         "service_name": service_name,
@@ -68,17 +65,15 @@ def register_service(
         raise DiscoveryError(error_msg)
 
 def discover_service(
-    discovery_host: str,
     service_name: str,
-    discovery_port: int = 8000
+    discovery_url: str = get_env_var("DISCOVERY_URL", None),
 ) -> Dict:
     """
     Discover a service by name
     
     Args:
-        discovery_host: IP/hostname of the discovery server
+        discovery_url: URL of the discovery server
         service_name: Name of the service to discover
-        discovery_port: Port of the discovery server (default: 8000)
     
     Returns:
         Service information including host, port, endpoint, and metadata
@@ -86,7 +81,7 @@ def discover_service(
     Raises:
         DiscoveryError: If service is not found or discovery fails
     """
-    discovery_url = f"http://{discovery_host}:{discovery_port}"
+    discovery_url = get_env_var("DISCOVERY_URL", None)
     
     try:
         response = requests.get(
@@ -113,17 +108,15 @@ def discover_service(
         raise DiscoveryError(error_msg)
 
 def get_service_endpoint(
-    discovery_host: str,
     service_name: str,
-    discovery_port: int = 8000
+    discovery_url: str = get_env_var("DISCOVERY_URL", None),
 ) -> str:
     """
     Get the endpoint (host:port) for a service
     
     Args:
-        discovery_host: IP/hostname of the discovery server
+        discovery_url: URL of the discovery server
         service_name: Name of the service to discover
-        discovery_port: Port of the discovery server (default: 8000)
     
     Returns:
         Service endpoint as "host:port" string
@@ -131,19 +124,17 @@ def get_service_endpoint(
     Raises:
         DiscoveryError: If service is not found or discovery fails
     """
-    service_info = discover_service(discovery_host, service_name, discovery_port)
+    service_info = discover_service(service_name, discovery_url)
     return service_info["endpoint"]
 
 def list_all_services(
-    discovery_host: str,
-    discovery_port: int = 8000
+    discovery_url: str = get_env_var("DISCOVERY_URL", None),
 ) -> Dict:
     """
     List all registered services
     
     Args:
-        discovery_host: IP/hostname of the discovery server
-        discovery_port: Port of the discovery server (default: 8000)
+        discovery_url: URL of the discovery server
     
     Returns:
         Dictionary containing all registered services
@@ -151,8 +142,6 @@ def list_all_services(
     Raises:
         DiscoveryError: If request fails
     """
-    discovery_url = f"http://{discovery_host}:{discovery_port}"
-    
     try:
         response = requests.get(
             f"{discovery_url}/services",
@@ -170,17 +159,14 @@ def list_all_services(
         raise DiscoveryError(error_msg)
 
 def unregister_service(
-    discovery_host: str,
     service_name: str,
-    discovery_port: int = 8000
+    discovery_url: str = get_env_var("DISCOVERY_URL", None),
 ) -> Dict:
     """
     Unregister a service from the discovery server
     
     Args:
-        discovery_host: IP/hostname of the discovery server
-        service_name: Name of the service to unregister
-        discovery_port: Port of the discovery server (default: 8000)
+        discovery_url: URL of the discovery server
     
     Returns:
         Response from the discovery server
@@ -188,8 +174,7 @@ def unregister_service(
     Raises:
         DiscoveryError: If unregistration fails
     """
-    discovery_url = f"http://{discovery_host}:{discovery_port}"
-    
+
     try:
         response = requests.delete(
             f"{discovery_url}/unregister/{service_name}",

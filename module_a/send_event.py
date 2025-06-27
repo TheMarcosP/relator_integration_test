@@ -7,13 +7,14 @@ from proto import data_pb2, data_pb2_grpc
 
 logging.basicConfig(level=logging.INFO, format="[Module A] %(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S,%f"[:-3])
 logger = logging.getLogger(__name__)
+MODULE_B_HOST = get_env_var("MODULE_B_HOST") or get_service_endpoint_from_discovery("module_b")
 
 class EventSender:
     """Client wrapper responsible for sending events to Module B asynchronously."""
 
     def __init__(self):
 
-        self.host = get_service_endpoint_from_discovery("module_b")
+        self.host = MODULE_B_HOST
         self._channel = grpc.insecure_channel(self.host)
         self._stub = data_pb2_grpc.ModuleBStub(self._channel)
 

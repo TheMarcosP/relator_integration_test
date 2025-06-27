@@ -67,7 +67,7 @@ def serve():
         start_grpc_server_with_discovery(
             server=server,
             service_name=SERVICE_NAME,
-            host=MODULE_D_HOST,
+            host_address=MODULE_D_HOST,
             metadata={
                 "version": "1.0.0",
                 "type": "audio_player",

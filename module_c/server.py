@@ -18,7 +18,7 @@ setup_logging()
 logger = logging.getLogger("Module C")
 SERVICE_NAME = "module_c"
 MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50053")
-MODULE_D_HOST = get_service_endpoint_from_discovery("module_d")
+MODULE_D_HOST = get_env_var("MODULE_D_HOST") or get_service_endpoint_from_discovery("module_d")
 
 class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
     def __init__(self):
@@ -54,7 +54,7 @@ def serve():
     start_grpc_server_with_discovery(
         server=server,
         service_name=SERVICE_NAME,
-        host=MODULE_C_HOST,
+        host_address=MODULE_C_HOST,
         metadata={
             "version": "1.0.0",
             "type": "text_to_speech",
