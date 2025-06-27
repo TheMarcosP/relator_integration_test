@@ -1,5 +1,1 @@
-"""
-RelatorDiscovery - Service Discovery for Relator Pipeline
-"""
-
-__version__ = "1.0.0" 
+# Discovery service module 

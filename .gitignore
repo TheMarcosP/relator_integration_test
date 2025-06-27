@@ -7,3 +7,5 @@ __pycache__/
 /football/gfootball/scenarios/__pycache__
 /module_a/football/build
 /football/build
+ENVIRONMENT_VARIABLES.md
+env.example

@@ -3,15 +3,21 @@ from concurrent import futures
 import os
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 import grpc
-from scripts.utils import get_env_var
+from scripts.discovery_utils import (
+    get_env_var, 
+    get_service_endpoint_from_discovery, 
+    start_grpc_server_with_discovery
+)
 from proto import data_pb2, data_pb2_grpc
 from module_b.dummy_event_to_text import EventToText
 # from module_b.event_to_text import EventToText
 
+# Service configuration
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
-
+SERVICE_NAME = "module_b"
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "0.0.0.0:50052")
-MODULE_C_HOST = get_env_var("MODULE_C_HOST", "0.0.0.0:50053")
+MODULE_C_HOST = get_service_endpoint_from_discovery("module_c")
+
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""
@@ -41,16 +47,21 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
             logging.error(msg)
         return data_pb2.BasicResponse(id=request.id, success=success, message=msg)
 
-
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleBServicer_to_server(ModuleBServicer(), server)
-    server.add_insecure_port(MODULE_B_HOST)
-    server.start()
-    logging.info(f"📡 Module B gRPC server listening on {MODULE_B_HOST}")
-    server.wait_for_termination()
-
+    
+    # Start server with discovery registration and graceful shutdown
+    start_grpc_server_with_discovery(
+        server=server,
+        service_name=SERVICE_NAME,
+        host=MODULE_B_HOST,
+        metadata={
+            "version": "1.0.0",
+            "type": "event_processor",
+            "description": "Converts events to text"
+        }
+    )
 
 if __name__ == "__main__":
     serve() 
-    

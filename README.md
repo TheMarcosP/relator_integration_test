@@ -1,6 +1,6 @@
-# Multi-Module gRPC Pipeline (A → B → C → D)
+# Multi-Module gRPC Pipeline with Service Discovery (A → B → C → D)
 
-This repository contains a minimal **end-to-end gRPC example** that streams dummy events through four micro-services with **automated service discovery**.
+This repository contains a **end-to-end gRPC example** that streams dummy events through four micro-services with automated service discovery.
 
 ```
 Module A  →  Module B  →  Module C  →  Module D
@@ -13,19 +13,69 @@ Each request/response carries a globally‐unique `id` field so you can trace a 
 
 Module D plays the `.wav` bytes using the `simpleaudio` library. Ensure your system audio works, and install optional dependencies via `pip install simpleaudio`.
 
-## 🔍 Service Discovery
+## 🆕 Service Discovery MVP
 
-The system now includes **RelatorDiscovery**, a FastAPI-based service discovery server that eliminates the need for manual service configuration. Services automatically register themselves and discover each other dynamically.
+The system now includes a **FastAPI-based service discovery service** that eliminates the need for manual endpoint configuration. Services can:
+- **Auto-register** themselves when they start
+- **Discover** other services dynamically  
+- Work across **different machines and networks**
+- **Pure discovery-based** communication (no manual configuration needed)
+- **Graceful shutdown** with automatic service unregistration
+- **Simplified networking** with explicit IP control via `SERVICE_HOST_IP`
+- **Clean logging** with module identification and verbosity control
 
 ---
-## 1. Quick Start (Traditional Mode)
+## 1. Quick Start
+
+### Option A: With Service Discovery (Recommended)
 
 1.  Install dependencies (inside a fresh virtual-env):
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  Start the three servers (**B**, **C**, **D**) in separate terminals (run them *as modules* so that Python treats their parent folder as a package):
+2.  Start the **Discovery Service** (on the machine that will act as the registry):
+    ```bash
+    python -m discovery.server
+    ```
+    The discovery service will start on `http://0.0.0.0:8000`
+
+3.  Configure discovery (copy and modify env.example):
+    ```bash
+    cp env.example .env
+    # Edit .env to set DISCOVERY_HOST if running on a different machine
+    ```
+
+4.  Start the services (all now use discovery):
+    
+    **Easy way (automated):**
+    ```bash
+    python start_services.py
+    ```
+    
+    **Manual way (separate terminals):**
+    ```bash
+    # Terminal 1
+    python -m module_d.server
+    # Terminal 2  
+    python -m module_c.server
+    # Terminal 3
+    python -m module_b.server_with_discovery
+    ```
+
+5.  Trigger the pipeline:
+    ```bash
+    python -m module_a.dummy_play_game
+    ```
+
+### Option B: Without Discovery (Legacy)
+
+1.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  Start the three servers (**B**, **C**, **D**) in separate terminals:
     ```bash
     # Terminal 1
     python -m module_d.server
@@ -34,100 +84,138 @@ The system now includes **RelatorDiscovery**, a FastAPI-based service discovery 
     # Terminal 3
     python -m module_b.server
     ```
-3.  Trigger the pipeline from **Module A** (also as a module):
+3.  Trigger the pipeline:
     ```bash
     python -m module_a.sender_client
     ```
-    You should see log lines flowing through all terminals. Module D will "play" each audio chunk sequentially while the other modules keep processing new events concurrently.
+    Note: This legacy approach requires manual configuration of service endpoints.
 
-## 2. Quick Start (Service Discovery Mode)
+### Testing the Discovery Service
 
-1.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+Run the test script to verify the discovery service is working:
 
-2.  Start the **Discovery Server**:
-    ```bash
-    python scripts/start_discovery.py
-    ```
-    The discovery server will start on `http://localhost:8000` and provide a web interface at that URL.
+```bash
+# Make sure discovery server is running first
+python -m discovery.server
 
-3.  Test the discovery server (optional):
-    ```bash
-    python scripts/test_discovery.py
-    ```
+# In another terminal, run the test
+python test_discovery.py
+```
 
-4.  Start the pipeline modules (they will auto-register with discovery):
-    ```bash
-    # Terminal 1
-    python -m module_d.server
-    # Terminal 2  
-    python -m module_c.server
-    # Terminal 3
-    python -m module_b.server
-    ```
-
-5.  Trigger the pipeline from **Module A**:
-    ```bash
-    python -m module_a.sender_client
-    ```
-    
-The modules will automatically discover each other through the discovery service - no manual configuration needed!
+This will demonstrate service registration, discovery, listing, and unregistration.
 
 ---
-## 3. Environment Variables
+## 2. Service Discovery System
 
-### Traditional Mode
-Every service reads its own host/port – as **well as the next service's address** – from environment variables. If none are supplied, the defaults below are used:
+### How it Works
 
-```
-MODULE_B_HOST=localhost:50052
-MODULE_C_HOST=localhost:50053
-MODULE_D_HOST=localhost:50054
-```
+The discovery service acts as an **online dictionary** where:
+- Services **register** themselves: `POST /register` with `{name, host, port, metadata}`
+- Services **discover** others: `GET /discover/{service_name}` returns `{host, port, endpoint, metadata}`
 
-### Service Discovery Mode
-Configure the system based on your deployment scenario:
+### Discovery API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Health check and registry status |
+| `POST` | `/register` | Register a service |
+| `GET` | `/discover/{name}` | Discover a service by name |
+| `GET` | `/services` | List all registered services |
+| `DELETE` | `/unregister/{name}` | Unregister a service |
+
+### CLI Tool
+
+Test the discovery service using the built-in CLI:
 
 ```bash
-# Basic configuration
-DISCOVERY_HOST=localhost:8000        # Discovery server location
+# Register a service
+python -m discovery.cli register my_service 8080 --metadata '{"version": "1.0"}'
 
-# Deployment mode (auto-detects if not specified)
-DEPLOYMENT_MODE=auto                 # auto, localhost, lan, wan, container
+# Discover a service  
+python -m discovery.cli discover my_service
 
-# Optional: Force specific service IP
-SERVICE_IP=192.168.1.101            # Override auto-detection
+# List all services
+python -m discovery.cli list
+
+# Get just the endpoint
+python -m discovery.cli endpoint my_service
+
+# Unregister a service
+python -m discovery.cli unregister my_service
+
+# Use remote discovery server
+python -m discovery.cli --discovery-host 192.168.1.100 list
 ```
 
-**Deployment Scenarios:**
-- **Same Machine**: `DEPLOYMENT_MODE=localhost` - All services on one machine
-- **LAN Network**: `DEPLOYMENT_MODE=lan` - Services across local network
-- **Internet/WAN**: `DEPLOYMENT_MODE=wan` - Services across different networks  
-- **Containers**: `DEPLOYMENT_MODE=container` - Docker/container deployment
-- **Manual**: `SERVICE_IP=x.x.x.x` - Explicit IP configuration
+### Environment Variables
 
-Use the deployment helper to generate configurations:
+**Discovery Configuration:**
 ```bash
-python scripts/deployment_examples.py create lan 192.168.1.100:8000
+DISCOVERY_HOST=localhost        # Discovery server location  
+SERVICE_HOST_IP=192.168.1.100   # Override auto-detected IP (optional)
+```
+
+**Service Binding (optional):**
+```bash
+MODULE_B_HOST=0.0.0.0:50052     # Bind address for Module B
+MODULE_C_HOST=0.0.0.0:50053     # Bind address for Module C
+MODULE_D_HOST=0.0.0.0:50054     # Bind address for Module D
+```
+
+**Logging Configuration:**
+```bash
+VERBOSE=true                    # Enable detailed debug logs (default: false)
 ```
 
 During local development you can place these keys in a `.env` file (they are loaded on every access via `scripts.utils.get_env_var`).
 
-## 4. Discovery Server API
+### Deployment Scenarios
 
-The RelatorDiscovery server provides the following REST endpoints:
+**Single Machine (Development):**
+```bash
+# All services on localhost, discovery on localhost:8000
+DISCOVERY_HOST=localhost
+```
 
-- `GET /` - Health check and service count
-- `POST /register` - Register a new service
-- `GET /discover/{service_name}` - Discover a service by name
-- `GET /services` - List all registered services
-- `POST /heartbeat/{service_id}` - Service heartbeat
-- `DELETE /unregister/{service_id}` - Unregister a service
-- `GET /pipeline/next/{current_module}` - Get next service in pipeline
+**Multiple Machines (Same LAN):**
+```bash
+# Discovery server on main machine
+DISCOVERY_HOST=192.168.1.100
+# Services auto-detect their own IPs and register
+```
 
-Visit `http://localhost:8000/docs` for interactive API documentation.
+**Different Networks:**
+```bash
+# Discovery server on publicly accessible host
+DISCOVERY_HOST=your-discovery-server.com
+# Services register with their public/accessible IPs
+```
+
+### IP Configuration
+
+The system uses a smart approach for IP configuration:
+
+1. **Environment Override**: Set `SERVICE_HOST_IP` for explicit control
+2. **Auto-detection**: Basic socket-based IP detection
+3. **Localhost Fallback**: Uses `127.0.0.1` if detection fails
+
+**For most scenarios**, auto-detection works fine. **Override when needed**:
+
+```bash
+# WSL users - when auto-detection gives 172.x.x.x IP
+SERVICE_HOST_IP=192.168.1.100
+
+# Multi-network machines - when auto-detection picks wrong interface
+SERVICE_HOST_IP=192.168.1.50
+
+# Production - for explicit control
+SERVICE_HOST_IP=10.0.1.100
+```
+
+**Benefits of this approach:**
+- ✅ **Works out-of-the-box**: Most users don't need to configure anything
+- ✅ **Override when needed**: Set `SERVICE_HOST_IP` for special cases
+- ✅ **Clear logging**: Shows which IP was chosen and why
 
 ---
 ### 🔒 Making Your WSL Server Accessible from Windows
