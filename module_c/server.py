@@ -10,8 +10,8 @@ from scripts.discovery_utils import (
     start_grpc_server_with_discovery
 )
 from proto import data_pb2, data_pb2_grpc
-from module_c.dummy_text_to_speech import TextToAudio
-# from module_c.text_to_speech import TextToAudio
+# from module_c.dummy_text_to_speech import TextToAudio
+from module_c.text_to_speech import TextToAudio
 
 # Service configuration
 setup_logging()
@@ -28,6 +28,8 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
 
         # processing component
         self.TextToAudio = TextToAudio()
+        self._audio_counter = 0          # new
+
 
     def TextToSpeech(self, request: data_pb2.Comment, context):  # noqa: N802
         logger.info(f"📥 Received text to process (id={request.id})")
