@@ -13,9 +13,9 @@ Each request/response carries a globally‐unique `id` field so you can trace a 
 
 Module D plays the `.wav` bytes using the `simpleaudio` library. Ensure your system audio works, and install optional dependencies via `pip install simpleaudio`.
 
-## 🆕 Service Discovery MVP
+## 🆕 Service Discovery
 
-The system now includes a **FastAPI-based service discovery service** that eliminates the need for manual endpoint configuration. Services can:
+The system includes a **FastAPI-based service discovery service** that eliminates the need for manual endpoint configuration. Services can:
 - **Auto-register** themselves when they start
 - **Discover** other services dynamically  
 - Work across **different machines and networks**
@@ -50,12 +50,7 @@ The system now includes a **FastAPI-based service discovery service** that elimi
     ```
 
 4.  Start the services (all now use discovery):
-    
-    **Easy way (automated):**
-    ```bash
-    python start_services.py
-    ```
-    
+        
     **Manual way (separate terminals):**
     ```bash
     # Terminal 1
@@ -71,53 +66,10 @@ The system now includes a **FastAPI-based service discovery service** that elimi
     python -m module_a.dummy_play_game
     ```
 
-### Option B: Without Discovery (Legacy)
+### Option B: Without Discovery 
 
-1.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+In the env file set `MODULE_B_HOST`, `MODULE_C_HOST`, `MODULE_D_HOST` to the address of the machine you are running each service on.
 
-2.  Start the three servers (**B**, **C**, **D**) in separate terminals:
-    ```bash
-    # Terminal 1
-    python -m module_d.server
-    # Terminal 2
-    python -m module_c.server
-    # Terminal 3
-    python -m module_b.server
-    ```
-3.  Trigger the pipeline:
-    ```bash
-    python -m module_a.sender_client
-    ```
-    Note: This legacy approach requires manual configuration of service endpoints.
-
-### Testing the Discovery Service
-
-Run the test script to verify the discovery service is working:
-
-```bash
-# Make sure discovery server is running first
-python -m discovery.server
-
-# In another terminal, run the test
-python test_discovery.py
-```
-
-This will demonstrate service registration, discovery, listing, and unregistration.
-
-### Testing Authentication
-
-Verify that API key authentication is working correctly:
-
-```bash
-# Set your API key and test authentication
-export DISCOVERY_API_KEY=your-api-key-here
-python -m scripts.test_auth
-```
-
-This will test both authenticated and unauthenticated requests to ensure security is working.
 
 ---
 ## 2. Service Discovery System
