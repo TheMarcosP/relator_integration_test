@@ -9,3 +9,5 @@ __pycache__/
 /football/build
 ENVIRONMENT_VARIABLES.md
 env.example
+module_c/Kokoro-82M
+module_b/llm_api_key.txt

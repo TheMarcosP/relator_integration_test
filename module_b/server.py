@@ -9,8 +9,8 @@ from scripts.discovery_utils import (
     start_grpc_server_with_discovery
 )
 from proto import data_pb2, data_pb2_grpc
-from module_b.dummy_event_to_text import EventToText
-# from module_b.event_to_text import EventToText
+# from module_b.dummy_event_to_text import EventToText
+from module_b.event_to_text import EventToText
 
 # Service configuration
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
@@ -19,6 +19,53 @@ MODULE_B_HOST = get_env_var("MODULE_B_HOST", "0.0.0.0:50052")
 MODULE_C_HOST = get_env_var("MODULE_C_HOST") or get_service_endpoint_from_discovery("module_c")
 
 
+# -------- settings file --------
+SETTINGS_TXT = os.path.join(os.path.dirname(__file__), "llm_api_key.txt")
+
+# -------- parse helper ---------
+def parse_settings(path: str) -> dict:
+    """Return dict with API_KEY, ENDPOINT, DEPLOYMENT from a text file.
+
+    Expected lines:
+        API_KEY     = "sk-…"
+        ENDPOINT    = "https://…"
+        DEPLOYMENT  = "my-whisper"
+    Blank lines or lines starting with # are ignored.
+    """
+    kv = {}
+    with open(path, "r", encoding="utf-8") as fh:
+        for raw in fh:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                raise ValueError(f"Malformed line: {raw!r}")
+            key, value = map(str.strip, line.split("=", 1))
+            kv[key] = value
+
+    missing = {"API_KEY", "ENDPOINT", "DEPLOYMENT"} - kv.keys()
+    if missing:
+        raise ValueError(f"Missing keys in settings file: {', '.join(missing)}")
+    return kv
+
+
+# -------- LLM PARAMS --------
+if not os.path.exists(SETTINGS_TXT):
+    raise FileNotFoundError(f"Missing llm_api_key.txt at {SETTINGS_TXT}")
+
+cfg = parse_settings(SETTINGS_TXT)
+API_KEY     = cfg["API_KEY"]
+ENDPOINT    = cfg["ENDPOINT"]
+DEPLOYMENT  = cfg["DEPLOYMENT"]
+
+print(
+    f"Using API_KEY: {API_KEY[:5]}… (truncated)\n"
+    f"Using ENDPOINT: {ENDPOINT}\n"
+    f"Using DEPLOYMENT: {DEPLOYMENT}"
+)
+
+
+# ------------------------- MAIN CODE ------------------------------------ #
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""
 
@@ -29,7 +76,9 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         logging.info(f"✅ Initialized connection to Module C at {MODULE_C_HOST}")
 
         # Processing component – heavy NLP, can tune delays
-        self.eventToText = EventToText()
+        self.eventToText = EventToText(api_key=API_KEY,
+                                       endpoint=ENDPOINT,
+                                       deployment=DEPLOYMENT)
 
     def ProcessEvent(self, request: data_pb2.Event, context):  # noqa: N802 (grpc naming)
         logging.info(f"📥 Received event (id={request.id})")
