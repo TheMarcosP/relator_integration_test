@@ -98,6 +98,7 @@ def auto_register_service(
         True if registration successful, False otherwise
     """
     try:
+        service_host = get_local_ip()
         result = register_service(
             service_name=service_name,
             service_host=service_host,  
