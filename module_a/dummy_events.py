@@ -87,7 +87,7 @@ def main() -> None:
         except grpc.RpcError as exc:
             logging.error("❌ gRPC error to Module B: %s", exc)
 
-        time.sleep(10.0)  # 1 event per second
+        time.sleep(3.0)  # 1 event per second
 
 
 if __name__ == "__main__":
