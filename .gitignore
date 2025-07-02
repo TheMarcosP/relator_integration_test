@@ -9,3 +9,6 @@ __pycache__/
 /football/build
 ENVIRONMENT_VARIABLES.md
 env.example
+/llm-commentaries-test/api_keys.txt
+llm-commentaries-test/token_hugging-face.txt
+llm-commentaries-test/api_keys_azure.txt
