@@ -12,3 +12,5 @@ env.example
 /llm-commentaries-test/api_keys.txt
 llm-commentaries-test/token_hugging-face.txt
 llm-commentaries-test/api_keys_azure.txt
+module_c/Kokoro-82M
+module_b/llm_api_key.txt

@@ -22,6 +22,6 @@ class EventToText:
         logger.info(f"🛠️  Processing Event (id={event.id}) for {delay:.2f}s…")
         time.sleep(delay)
         # Simple conversion: join map key/values
-        text = ", ".join(f"{k} is {v}" for k, v in event.data.items())
+        text = ", ".join(f"La clave {k} tiene {v}" for k, v in event.data.items())
         logger.info(f"✅ Processed Event (id={event.id}) text:\n'{text[:90]}…'")
         return text 

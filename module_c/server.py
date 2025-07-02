@@ -10,8 +10,8 @@ from scripts.discovery_utils import (
     start_grpc_server_with_discovery
 )
 from proto import data_pb2, data_pb2_grpc
-from module_c.dummy_text_to_speech import TextToAudio
-# from module_c.text_to_speech import TextToAudio
+# from module_c.dummy_text_to_speech import TextToAudio
+from module_c.text_to_speech import TextToAudio
 
 # Service configuration
 setup_logging()
@@ -28,14 +28,18 @@ class ModuleCServicer(data_pb2_grpc.ModuleCServicer):
 
         # processing component
         self.TextToAudio = TextToAudio()
+        self._audio_counter = 0          # new
 
     def TextToSpeech(self, request: data_pb2.Comment, context):  # noqa: N802
-        logger.info(f"📥 Received text to process (id={request.id})")
+        logging.info(f"📥 Received text to process (id={request.id})")
         audio_bytes = self.TextToAudio.process(request)
-        logger.info(f"➡️  Forwarding audio to Module D … (id={request.id})")
+        # assign monotonic integer so Module D never needs to remap
+        audio_id = str(self._audio_counter)
+        self._audio_counter += 1
+        logging.info(f"➡️  Forwarding audio to Module D … (audio_id={audio_id})")        
         try:
             response_d = self._d_stub.PlayAudio(
-                data_pb2.Audio(id=request.id, audio_data=audio_bytes)
+                data_pb2.Audio(id=audio_id, audio_data=audio_bytes)
             )
             success = response_d.success
             msg = response_d.message
