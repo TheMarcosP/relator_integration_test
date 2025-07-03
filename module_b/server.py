@@ -44,6 +44,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         
         # Start the periodic processing thread
         self._start_processing_thread()
+        self.count = 0
 
     def _start_processing_thread(self):
         """Start the background thread that processes events periodically."""
@@ -137,7 +138,17 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         
         # Check if this is the start_of_match event for special handling
         event_data = json.loads(request.data)
-        if event_data.get("type") == "start_of_match":
+        # Log the received event in a separated json file that is in the folder dummy_events_new
+        # Save in a json file
+        # self.count+= 1
+        # event_json_path = f"module_b/dummy_events_new/{self.count}.json"
+        # with open(event_json_path, 'w') as f:
+        #     # Opción 1: Guardar como string JSON escapado (formato que quieres)
+        #     json_string = json.dumps(event_data, separators=(',', ':'))  # Sin espacios
+        #     escaped_json = json.dumps(json_string)  # Escapar el string JSON
+        #     f.write(escaped_json)
+        # logging.info(f"📥 Received event (id={request.id}) saved to {event_json_path}")
+        if event_data.get("type") == "inicio_del_partido":
             logging.info(f"📥 Received START_OF_MATCH event (id={request.id}) - processing immediately")
             self._process_start_of_match_event(request)
         else:
@@ -145,11 +156,13 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
             # Add event to queue for batch processing
             self.event_queue.put(request)
         
+        # Log len the queue
+        logging.info(f"🔢 Current event queue size: {self.event_queue.qsize()}")
         # Return immediate acknowledgment
         return data_pb2.BasicResponse(
             id=request.id, 
             success=True, 
-            message="Event processed" if event_data.get("type") == "start_of_match" else "Event queued for batch processing"
+            message="Event processed" if event_data.get("type") == "inicio_del_partido" else "Event queued for batch processing"
         )
 
     def shutdown(self):
@@ -161,7 +174,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         self._c_channel.close()
 
 def serve():
-    servicer = ModuleBServicer(batch_interval_seconds=8)  # Configurable interval
+    servicer = ModuleBServicer(batch_interval_seconds=4)  # Configurable interval
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleBServicer_to_server(servicer, server)

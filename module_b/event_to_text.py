@@ -91,7 +91,7 @@ class EventToText:
         """Save LLM call details to debug file."""
         self.call_counter += 1
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{timestamp}_{self.call_counter:03d}_{call_type}.json"
+        filename = f"llm_call_{self.call_counter:03d}_{call_type}.json"
         
         # Process messages to make embedded JSON readable
         readable_messages = []
