@@ -2,6 +2,8 @@ import os
 import time
 import logging
 import json
+from datetime import datetime
+from pathlib import Path
 from openai import AzureOpenAI
 from proto import data_pb2  # type: ignore
 from typing import List
@@ -36,14 +38,25 @@ class EventToText:
             api_version="2024-12-01-preview"
         )
 
+        # Conversation history - keep last 5 exchanges (10 messages)
+        self.conversation_history = []
+        self.max_history_exchanges = 5
+
+        # Debug logging setup
+        self.debug_dir = Path("debug_llm_calls")
+        self.debug_dir.mkdir(exist_ok=True)
+        self.call_counter = 0
+
         # System prompt for batch processing
         self.system_prompt = (
             "Eres un comentarista de fútbol EN TIEMPO REAL con estilo argentino como Mariano Closs. "
             "Recibirás eventos del juego en formato JSON. "
             "Tu tarea es crear un pequeño relato FLUIDO y NATURAL que conecte estos eventos, "
-            "contando la brevemente de lo que está sucediendo en el partido. "
-            "Genera un comentario MUY MUY MUY CORTO pero EMOCIONANTE (máximo 1 oración). "
-            "Siempre responde en español y mantén el ritmo dinámico del fútbol."
+            "Genera un comentario MUY MUY MUY CORTO pero EMOCIONANTE de lo más importante que ocurrió en los ultimos eventos (máximo 1 oración breve). "
+            "Siempre responde en español y mantén el ritmo dinámico del fútbol. "
+            "Variar entre usar el last_name y el nickname del jugador."
+            "Cuando no ocurre nada, nombrar al jugador que tiene la pelota. Como por ejemplo: 'La tiene Messi', o simplemente 'Messi'." 
+            "No repetirse con los comentarios de eventos anteriores."
         )
 
         # Special system prompt for match start
@@ -57,6 +70,114 @@ class EventToText:
             "Siempre responde en español."
         )
 
+    def _add_to_conversation(self, user_message: str, assistant_message: str):
+        """Add a user-assistant exchange to conversation history."""
+        self.conversation_history.append({"role": "user", "content": user_message})
+        self.conversation_history.append({"role": "assistant", "content": assistant_message})
+        
+        # Keep only last N exchanges (N*2 messages)
+        max_messages = self.max_history_exchanges * 2
+        if len(self.conversation_history) > max_messages:
+            self.conversation_history = self.conversation_history[-max_messages:]
+
+    def _build_messages(self, system_prompt: str, user_message: str) -> List[dict]:
+        """Build the complete message list with system prompt and conversation history."""
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(self.conversation_history)
+        messages.append({"role": "user", "content": user_message})
+        return messages
+
+    def _save_debug_call(self, call_type: str, messages: List[dict], response_content: str, latency: float):
+        """Save LLM call details to debug file."""
+        self.call_counter += 1
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{timestamp}_{self.call_counter:03d}_{call_type}.json"
+        
+        # Process messages to make embedded JSON readable
+        readable_messages = []
+        for msg in messages:
+            readable_msg = msg.copy()
+            if msg["role"] == "user" and ("evento del juego:" in msg["content"].lower() or "eventos del juego:" in msg["content"].lower()):
+                readable_msg["content_formatted"] = self._format_user_content(msg["content"])
+            readable_messages.append(readable_msg)
+        
+        debug_data = {
+            "timestamp": timestamp,
+            "call_number": self.call_counter,
+            "call_type": call_type,
+            "latency_seconds": latency,
+            "messages_sent": readable_messages,
+            "response_content": response_content,
+            "conversation_history_length": len(self.conversation_history)
+        }
+        
+        debug_file = self.debug_dir / filename
+        with open(debug_file, 'w', encoding='utf-8') as f:
+            json.dump(debug_data, f, indent=2, ensure_ascii=False)
+        
+        logger.debug(f"💾 Saved debug call to {filename}")
+
+    def _format_user_content(self, content: str) -> dict:
+        """Format user content to make embedded JSON events readable."""
+        try:
+            lines = content.split('\n')
+            formatted_content = {
+                "instruction": "",
+                "events": [],
+                "request": ""
+            }
+            
+            current_section = "instruction"
+            current_event_json = ""
+            
+            for line in lines:
+                if line.strip().startswith('{"event_id"'):
+                    if current_event_json:
+                        # Parse previous event
+                        try:
+                            event_data = json.loads(current_event_json)
+                            formatted_content["events"].append(event_data)
+                        except:
+                            formatted_content["events"].append({"raw": current_event_json})
+                    current_event_json = line.strip()
+                    current_section = "events"
+                elif line.strip() == "---":
+                    if current_event_json:
+                        # Parse current event
+                        try:
+                            event_data = json.loads(current_event_json)
+                            formatted_content["events"].append(event_data)
+                        except:
+                            formatted_content["events"].append({"raw": current_event_json})
+                        current_event_json = ""
+                elif line.strip().startswith("Genera un relato"):
+                    if current_event_json:
+                        # Parse last event
+                        try:
+                            event_data = json.loads(current_event_json)
+                            formatted_content["events"].append(event_data)
+                        except:
+                            formatted_content["events"].append({"raw": current_event_json})
+                        current_event_json = ""
+                    formatted_content["request"] = line.strip()
+                    current_section = "request"
+                elif current_section == "instruction":
+                    formatted_content["instruction"] += line + "\n"
+            
+            # Handle last event if exists
+            if current_event_json:
+                try:
+                    event_data = json.loads(current_event_json)
+                    formatted_content["events"].append(event_data)
+                except:
+                    formatted_content["events"].append({"raw": current_event_json})
+            
+            formatted_content["instruction"] = formatted_content["instruction"].strip()
+            return formatted_content
+            
+        except Exception as e:
+            return {"error": f"Failed to format content: {e}", "raw_content": content}
+
     def process_start_of_match(self, event: data_pb2.Event) -> str:
         """Process the special start_of_match event with detailed introduction."""
         # Convert the event data to JSON string for the LLM
@@ -68,15 +189,13 @@ class EventToText:
             "Genera una presentación emocionante para el inicio de este partido de fútbol:"
         )
 
-        # Call Azure OpenAI with special prompt
+        # Call Azure OpenAI with special prompt and conversation history
         start = time.time()
         try:
+            messages = self._build_messages(self.start_match_prompt, user_msg)
             response = self.client.chat.completions.create(
                 model=self.deployment,
-                messages=[
-                    {"role": "system", "content": self.start_match_prompt},
-                    {"role": "user",   "content": user_msg},
-                ],
+                messages=messages,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 top_p=self.top_p,
@@ -85,6 +204,12 @@ class EventToText:
 
             # Extract comment
             comment = response.choices[0].message.content.strip()
+
+            # Add to conversation history
+            self._add_to_conversation(user_msg, comment)
+
+            # Save debug information
+            self._save_debug_call("start_match", messages, comment, latency)
 
             # Log metrics
             logger.info(
@@ -114,24 +239,22 @@ class EventToText:
         if len(events) == 1:
             user_msg = (
                 f"Evento del juego:\n\n{events_json_list[0]}\n\n"
-                "Genera un comentario dinámico sobre esta acción:"
+                # "Genera un comentario dinámico sobre esta acción"
             )
         else:
             events_text = "\n\n---\n\n".join(events_json_list)
             user_msg = (
                 f"Secuencia de {len(events)} eventos del juego:\n\n{events_text}\n\n"
-                "Genera un relato fluido que conecte estos eventos y capture la emoción del momento:"
+                # f"Comenta uno de los siguientes {len(events)} eventos del juego (máximo 10 palabras):\n\n{events_text}\n\n"
             )
 
-        # Call Azure OpenAI
+        # Call Azure OpenAI with conversation history
         start = time.time()
         try:
+            messages = self._build_messages(self.system_prompt, user_msg)
             response = self.client.chat.completions.create(
                 model=self.deployment,
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user",   "content": user_msg},
-                ],
+                messages=messages,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 top_p=self.top_p,
@@ -141,6 +264,12 @@ class EventToText:
             # Extract comment
             comment = response.choices[0].message.content.strip()
 
+            # Add to conversation history
+            self._add_to_conversation(user_msg, comment)
+
+            # Save debug information
+            self._save_debug_call(f"", messages, comment, latency)
+
             # Log metrics
             logger.info(
                 "[Module B] Processed batch of %d events in %.2f s (tokens: %s)",
@@ -149,7 +278,7 @@ class EventToText:
                 getattr(response.usage, 'total_tokens', None)
             )
             # Log prompt
-            
+            logger.info(f'  Comment:\n{comment}')
             return comment
 
         except Exception as e:

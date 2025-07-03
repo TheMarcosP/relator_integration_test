@@ -161,7 +161,7 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
         self._c_channel.close()
 
 def serve():
-    servicer = ModuleBServicer(batch_interval_seconds=4)  # Configurable interval
+    servicer = ModuleBServicer(batch_interval_seconds=8)  # Configurable interval
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     data_pb2_grpc.add_ModuleBServicer_to_server(servicer, server)

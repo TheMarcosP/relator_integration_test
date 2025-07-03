@@ -20,6 +20,17 @@ import soundfile as sf
 import torch
 from kokoro import KPipeline
 
+# Monkey patch torch.load to handle Kokoro's voice files
+# PyTorch 2.6+ defaults to weights_only=True which breaks Kokoro voice loading
+# Kokoro explicitly sets weights_only=True, so we need to override it
+_original_torch_load = torch.load
+def _patched_torch_load(*args, **kwargs):
+    # Force weights_only=False for Kokoro compatibility
+    kwargs['weights_only'] = False
+    return _original_torch_load(*args, **kwargs)
+
+torch.load = _patched_torch_load
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -28,6 +39,8 @@ logger.setLevel(logging.DEBUG)
 LOCAL_DIR = Path(os.getenv("KOKORO_REPO_DIR", Path(__file__).parent / "Kokoro-82M")).expanduser()
 VOICE_DEFAULT = "em_alex"
 SAMPLE_RATE = 24_000
+# Set KOKORO_FORCE_HUB=1 to bypass local files and always use HuggingFace hub
+FORCE_HUB = os.getenv("KOKORO_FORCE_HUB", "0").lower() in ("1", "true", "yes")
 # -----------------------------------------------------------------------------
 
 class TextToAudio:
@@ -47,17 +60,33 @@ class TextToAudio:
             # pointing HF_HOME there and forcing offline mode.
             os.environ["HF_HOME"] = str(LOCAL_DIR)
             os.environ["HF_HUB_OFFLINE"] = "1"
-            self.pipe = KPipeline(lang_code="e", repo_id="hexgrad/Kokoro-82M", device="cuda")
+            self.pipe = KPipeline(lang_code="e", repo_id="hexgrad/Kokoro-82M", device="cpu")
             logger.info("📦 Loaded Kokoro from local dir %s", cache_dir)
             # Use absolute path to voice file so load_voice skips HF download
             voice_path = LOCAL_DIR / "voices" / f"{voice}.pt"
             if voice_path.exists():
-                self.voice_file = str(voice_path)
+                # Check if the voice file is valid by trying to peek at it
+                try:
+                    file_size = voice_path.stat().st_size
+                    logger.info("🔍 Found local voice file: %s (size: %d bytes)", voice_path, file_size)
+                    
+                    # Quick validation - try to read first few bytes
+                    with open(voice_path, 'rb') as f:
+                        header = f.read(8)
+                        if len(header) < 8:
+                            raise ValueError("Voice file too small")
+                    
+                    self.voice_file = str(voice_path)
+                    logger.info("✅ Using local voice file: %s", self.voice_file)
+                except Exception as e:
+                    logger.warning("⚠️  Local voice file corrupted (%s), falling back to hub", e)
+                    self.voice_file = voice  # fallback to hub
             else:
+                logger.info("🌐 Local voice file not found, using hub")
                 self.voice_file = voice  # fallback to hub
         else:
             # No local copy – pull from hub
-            self.pipe = KPipeline(lang_code="e", repo_id="hexgrad/Kokoro-82M", device="cuda")
+            self.pipe = KPipeline(lang_code="e", repo_id="hexgrad/Kokoro-82M", device="cpu")
             self.voice_file = voice
             logger.info("🌐 Using Kokoro from HuggingFace hub")
 

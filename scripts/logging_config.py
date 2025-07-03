@@ -31,6 +31,10 @@ def setup_logging(verbose: bool = None):
         logging.getLogger("requests").setLevel(logging.WARNING)
         logging.getLogger("uvicorn").setLevel(logging.WARNING)
         logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+        # Silence OpenAI HTTP request logs
+        logging.getLogger("openai").setLevel(logging.WARNING)
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
     
     # Always keep important service logs at INFO level
     logging.getLogger("Discovery Utils").setLevel(logging.INFO)

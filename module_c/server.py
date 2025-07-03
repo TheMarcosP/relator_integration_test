@@ -10,8 +10,8 @@ from scripts.discovery_utils import (
     start_grpc_server_with_discovery
 )
 from proto import data_pb2, data_pb2_grpc
-# from module_c.dummy_text_to_speech import TextToAudio
-from module_c.text_to_speech import TextToAudio
+from module_c.dummy_text_to_speech import TextToAudio
+# from module_c.text_to_speech import TextToAudio
 
 # Service configuration
 setup_logging()
