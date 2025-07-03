@@ -1,19 +1,21 @@
 import os
 import time
 import logging
+import json
 from openai import AzureOpenAI
 from proto import data_pb2  # type: ignore
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 class EventToText:
-    """NLP processing: converts events to a comment about the game"""
+    """NLP processing: converts batches of events to game commentary"""
 
     def __init__(self,
                  api_key: str = None,
                  endpoint: str = None,
                  deployment: str = None,
-                 max_tokens: int = 50,
+                 max_tokens: int = 150,  # Increased for batch processing
                  temperature: float = 0.7,
                  top_p: float = 0.9):
         # Load configuration from env if not provided
@@ -34,52 +36,125 @@ class EventToText:
             api_version="2024-12-01-preview"
         )
 
-        # System prompt to guide the model
+        # System prompt for batch processing
         self.system_prompt = (
-            "Eres un comentarista de fútbol EN TIEMPO REAL. "
-            "Tu tarea es generar comentarios CORTOS y PRECISOS basados en cada evento recibido, "
-            "con un estilo auténticamente argentino (como Mariano Closs). "
+            "Eres un comentarista de fútbol EN TIEMPO REAL con estilo argentino como Mariano Closs. "
+            "Recibirás eventos del juego en formato JSON. "
+            "Tu tarea es crear un relato FLUIDO y NATURAL que conecte estos eventos, "
+            "contando la historia de lo que está pasando en el partido. "
+            "Genera un comentario MUY CORTO pero EMOCIONANTE (máximo 2 oraciones). "
+            "Siempre responde en español y mantén el ritmo dinámico del fútbol."
+        )
+
+        # Special system prompt for match start
+        self.start_match_prompt = (
+            "Eres un comentarista de fútbol profesional con estilo argentino como Mariano Closs. "
+            "Recibirás los metadatos de inicio de un partido de fútbol en formato JSON. "
+            "Tu tarea es hacer una PRESENTACIÓN EMOCIONANTE del partido que está por comenzar. "
+            "Incluye: saludo inicial, presentación de los equipos, estadio, competición, y algún dato relevante. "
+            "Genera una introducción CAUTIVANTE pero CONCISA (máximo 4-5 oraciones). "
+            "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
             "Siempre responde en español."
         )
 
-    def process(self, event: data_pb2.Event) -> str:
-        """Process incoming Event and return commentary string."""
-        # Extract event fields
-        data = event.data
-        minuto = data.get("minuto", "?") # Default to "?" if not present
-        equipo = data.get("equipo", "?")
-        jugador = data.get("jugador", "?")
-        accion = data.get("accion", "?")
-
-        # Build user message
+    def process_start_of_match(self, event: data_pb2.Event) -> str:
+        """Process the special start_of_match event with detailed introduction."""
+        # Convert the event data to JSON string for the LLM
+        event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
+        
         user_msg = (
-            f"Minuto {minuto}, el {jugador} del equipo {equipo} "
-            f"realiza un {accion}. Comenta:"
+            "Datos del partido que está por comenzar:\n\n"
+            f"{event_json}\n\n"
+            "Genera una presentación emocionante para el inicio de este partido de fútbol:"
         )
+
+        # Call Azure OpenAI with special prompt
+        start = time.time()
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=[
+                    {"role": "system", "content": self.start_match_prompt},
+                    {"role": "user",   "content": user_msg},
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                top_p=self.top_p,
+            )
+            latency = time.time() - start
+
+            # Extract comment
+            comment = response.choices[0].message.content.strip()
+
+            # Log metrics
+            logger.info(
+                "[Module B] Processed start_of_match event in %.2f s (tokens: %s)",
+                latency,
+                getattr(response.usage, 'total_tokens', None)
+            )
+
+            return comment
+
+        except Exception as e:
+            logger.error(f"Error processing start_of_match event: {str(e)}")
+            return ""
+
+    def process_batch(self, events: List[data_pb2.Event]) -> str:
+        """Process a batch of events and return a cohesive commentary string."""
+        if not events:
+            return ""
+
+        # Convert events to JSON strings instead of parsing them
+        events_json_list = []
+        for event in events:
+            event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
+            events_json_list.append(event_json)
+
+        # Create user message with raw JSON events
+        if len(events) == 1:
+            user_msg = (
+                f"Evento del juego:\n\n{events_json_list[0]}\n\n"
+                "Genera un comentario dinámico sobre esta acción:"
+            )
+        else:
+            events_text = "\n\n---\n\n".join(events_json_list)
+            user_msg = (
+                f"Secuencia de {len(events)} eventos del juego:\n\n{events_text}\n\n"
+                "Genera un relato fluido que conecte estos eventos y capture la emoción del momento:"
+            )
 
         # Call Azure OpenAI
         start = time.time()
-        response = self.client.chat.completions.create(
-            model=self.deployment,
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user",   "content": user_msg},
-            ],
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            top_p=self.top_p,
-        )
-        latency = time.time() - start
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user",   "content": user_msg},
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                top_p=self.top_p,
+            )
+            latency = time.time() - start
 
-        # Extract comment
-        comment = response.choices[0].message.content.strip()
+            # Extract comment
+            comment = response.choices[0].message.content.strip()
 
-        # Log metrics
-        logger.debug(
-            "[Module B] Processed event %s in %.2f s (tokens: %s)",
-            event.id,
-            latency,
-            getattr(response.usage, 'total_tokens', None)
-        )
+            # Log metrics
+            logger.info(
+                "[Module B] Processed batch of %d events in %.2f s (tokens: %s)",
+                len(events),
+                latency,
+                getattr(response.usage, 'total_tokens', None)
+            )
 
-        return comment
+            return comment
+
+        except Exception as e:
+            logger.error(f"Error processing batch of {len(events)} events: {str(e)}")
+            return ""
+
+    def process(self, event: data_pb2.Event) -> str:
+        """Legacy method - process single event (kept for compatibility)."""
+        return self.process_batch([event])
