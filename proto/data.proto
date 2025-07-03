@@ -5,7 +5,7 @@ package pipeline;
 // Event sent from Module A to Module B
 message Event {
   string id = 1;
-  map<string, string> data = 2;
+  string data = 2;
 }
 
 // Text sent from Module B to Module C

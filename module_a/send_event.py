@@ -21,7 +21,7 @@ class EventSender:
     # ------------------------------------------------------------------
     # public API
     # ------------------------------------------------------------------
-    def send_async(self, event_id: str, payload: Dict[str, str]) -> None:
+    def send_async(self, event_id: str, payload: str) -> None:
         """Fire-and-forget send; returns immediately."""
         event_msg = data_pb2.Event(id=event_id, data=payload)
         future = self._stub.ProcessEvent.future(event_msg)

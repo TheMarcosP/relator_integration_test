@@ -24,29 +24,25 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ndata.proto\x12\x08pipeline\"i\n\x05\x45vent\x12\n\n\x02id\x18\x01 \x01(\t\x12\'\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x19.pipeline.Event.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"#\n\x07\x43omment\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"\'\n\x05\x41udio\x12\n\n\x02id\x18\x01 \x01(\t\x12\x12\n\naudio_data\x18\x02 \x01(\x0c\"=\n\rBasicResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x0f\n\x07message\x18\x03 \x01(\t2C\n\x07ModuleB\x12\x38\n\x0cProcessEvent\x12\x0f.pipeline.Event\x1a\x17.pipeline.BasicResponse2E\n\x07ModuleC\x12:\n\x0cTextToSpeech\x12\x11.pipeline.Comment\x1a\x17.pipeline.BasicResponse2@\n\x07ModuleD\x12\x35\n\tPlayAudio\x12\x0f.pipeline.Audio\x1a\x17.pipeline.BasicResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ndata.proto\x12\x08pipeline\"!\n\x05\x45vent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\t\"#\n\x07\x43omment\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"\'\n\x05\x41udio\x12\n\n\x02id\x18\x01 \x01(\t\x12\x12\n\naudio_data\x18\x02 \x01(\x0c\"=\n\rBasicResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x0f\n\x07message\x18\x03 \x01(\t2C\n\x07ModuleB\x12\x38\n\x0cProcessEvent\x12\x0f.pipeline.Event\x1a\x17.pipeline.BasicResponse2E\n\x07ModuleC\x12:\n\x0cTextToSpeech\x12\x11.pipeline.Comment\x1a\x17.pipeline.BasicResponse2@\n\x07ModuleD\x12\x35\n\tPlayAudio\x12\x0f.pipeline.Audio\x1a\x17.pipeline.BasicResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'data_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_EVENT_DATAENTRY']._loaded_options = None
-  _globals['_EVENT_DATAENTRY']._serialized_options = b'8\001'
   _globals['_EVENT']._serialized_start=24
-  _globals['_EVENT']._serialized_end=129
-  _globals['_EVENT_DATAENTRY']._serialized_start=86
-  _globals['_EVENT_DATAENTRY']._serialized_end=129
-  _globals['_COMMENT']._serialized_start=131
-  _globals['_COMMENT']._serialized_end=166
-  _globals['_AUDIO']._serialized_start=168
-  _globals['_AUDIO']._serialized_end=207
-  _globals['_BASICRESPONSE']._serialized_start=209
-  _globals['_BASICRESPONSE']._serialized_end=270
-  _globals['_MODULEB']._serialized_start=272
-  _globals['_MODULEB']._serialized_end=339
-  _globals['_MODULEC']._serialized_start=341
-  _globals['_MODULEC']._serialized_end=410
-  _globals['_MODULED']._serialized_start=412
-  _globals['_MODULED']._serialized_end=476
+  _globals['_EVENT']._serialized_end=57
+  _globals['_COMMENT']._serialized_start=59
+  _globals['_COMMENT']._serialized_end=94
+  _globals['_AUDIO']._serialized_start=96
+  _globals['_AUDIO']._serialized_end=135
+  _globals['_BASICRESPONSE']._serialized_start=137
+  _globals['_BASICRESPONSE']._serialized_end=198
+  _globals['_MODULEB']._serialized_start=200
+  _globals['_MODULEB']._serialized_end=267
+  _globals['_MODULEC']._serialized_start=269
+  _globals['_MODULEC']._serialized_end=338
+  _globals['_MODULED']._serialized_start=340
+  _globals['_MODULED']._serialized_end=404
 # @@protoc_insertion_point(module_scope)

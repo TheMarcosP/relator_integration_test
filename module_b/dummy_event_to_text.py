@@ -25,3 +25,6 @@ class EventToText:
         text = ", ".join(f"La clave {k} tiene {v}" for k, v in event.data.items())
         logger.info(f"✅ Processed Event (id={event.id}) text:\n'{text[:90]}…'")
         return text 
+    
+    def process_start_of_match(self, event: data_pb2.Event) -> str:
+        return str(event.data)

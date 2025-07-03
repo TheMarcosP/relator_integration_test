@@ -65,7 +65,7 @@ def main():
         for key, value in summary.items():
           if not isinstance(value, str):
             summary[key] = str(value)
-        sender.send_async(str(step), summary) # (4) SEND EVENT (id, data)
+        sender.send_async(str(step), str('{"type": "start_of_match", "match": ["argentina","francia"]}')) # (4) SEND EVENT (id, data)
         logger.info(f"✅ Sent event (id={step})")
       except Exception as e:
         logger.error(f"❌ Failed to send event: {e}")
