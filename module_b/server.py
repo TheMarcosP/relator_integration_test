@@ -115,6 +115,34 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
             if events:
                 self._process_event_batch(events)
 
+    def _process_start_of_match_event(self, event):
+        """Process the special start_of_match event immediately."""
+        try:
+            # Generate opening commentary
+            text = self.eventToText.process_start_of_match(event)
+            
+            if text and text.strip():
+                logging.info(f"➡️  Forwarding opening commentary (id={event.id}) to Module C")
+                
+                # Send to Module C
+                response_c = self._c_stub.TextToSpeech(
+                    data_pb2.Comment(id=event.id, text=text)
+                )
+                
+                if response_c.success:
+                    logging.info(f"✅ Successfully sent opening commentary to Module C")
+                else:
+                    logging.warning(f"⚠️  Module C reported issue with opening commentary: {response_c.message}")
+            else:
+                logging.info(f"📝 No opening commentary generated")
+                
+        except grpc.RpcError as exc:
+            error_msg = f"❌ Failed to forward opening commentary to Module C: {exc.details()}"
+            logging.error(error_msg)
+        except Exception as exc:
+            error_msg = f"❌ Error processing opening commentary: {str(exc)}"
+            logging.error(error_msg)
+
     def _process_event_batch(self, events):
         """Process a batch of events and send the result to Module C."""
         self.last_batch_id += 1
@@ -150,16 +178,22 @@ class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
 
     def ProcessEvent(self, request: data_pb2.Event, context):  # noqa: N802 (grpc naming)
         """Receive an event and add it to the processing queue."""
-        logging.info(f"📥 Received event (id={request.id}) - added to queue")
         
-        # Add event to queue for batch processing
-        self.event_queue.put(request)
+        # Check if this is the start_of_match event for special handling
+        event_data = request.data
+        if event_data.get("type") == "start_of_match":
+            logging.info(f"📥 Received START_OF_MATCH event (id={request.id}) - processing immediately")
+            self._process_start_of_match_event(request)
+        else:
+            logging.info(f"📥 Received event (id={request.id}) - added to queue")
+            # Add event to queue for batch processing
+            self.event_queue.put(request)
         
         # Return immediate acknowledgment
         return data_pb2.BasicResponse(
             id=request.id, 
             success=True, 
-            message="Event queued for batch processing"
+            message="Event processed" if event_data.get("type") == "start_of_match" else "Event queued for batch processing"
         )
 
     def shutdown(self):

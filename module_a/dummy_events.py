@@ -24,9 +24,13 @@ import grpc
 # Local helpers / stubs -------------------------------------------------------
 from scripts.utils import get_env_var  # reloads .env each call
 from proto import data_pb2, data_pb2_grpc
+from google.protobuf.struct_pb2 import Struct
+
 
 # ---------------------------------------------------------------------------
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "localhost:50052")
+
+
 
 # A small pool of plausible football actions for the dummy feed
 ACTIONS = [
@@ -58,7 +62,6 @@ def build_event() -> data_pb2.Event:
         },
     )
 
-
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -75,7 +78,7 @@ def main() -> None:
         sys.exit(0)
 
     signal.signal(signal.SIGINT, _sigint_handler)
-
+    num_events = 0
     # Main loop --------------------------------------------------------------
     while True:
         evt = build_event()
@@ -86,7 +89,7 @@ def main() -> None:
             logging.info("✅ Module B ack: %s", status)
         except grpc.RpcError as exc:
             logging.error("❌ gRPC error to Module B: %s", exc)
-
+        num_events += 1
         time.sleep(3.0)  # 1 event per second
 
 

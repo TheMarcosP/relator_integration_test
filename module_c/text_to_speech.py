@@ -73,7 +73,7 @@ class TextToAudio:
     def _collect(self, text: str) -> np.ndarray:
         chunks: List[np.ndarray] = []
         for idx, (*_, ch) in enumerate(
-            self.pipe(text, voice=self.voice_file, speed=1.0, split_pattern="\n+")
+            self.pipe(text, voice=self.voice_file, speed=1.3, split_pattern="\n+")
         ):
             arr = self._to_np(ch)
             chunks.append(arr)

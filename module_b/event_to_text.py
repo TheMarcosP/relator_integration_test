@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import json
 from openai import AzureOpenAI
 from proto import data_pb2  # type: ignore
 from typing import List
@@ -38,45 +39,88 @@ class EventToText:
         # System prompt for batch processing
         self.system_prompt = (
             "Eres un comentarista de fútbol EN TIEMPO REAL con estilo argentino como Mariano Closs. "
-            "Recibirás varios eventos del juego que ocurrieron en los últimos segundos. "
+            "Recibirás eventos del juego en formato JSON. "
             "Tu tarea es crear un relato FLUIDO y NATURAL que conecte estos eventos, "
             "contando la historia de lo que está pasando en el partido. "
-            "Genera un comentario CORTO pero EMOCIONANTE (máximo 2-3 oraciones). "
+            "Genera un comentario MUY CORTO pero EMOCIONANTE (máximo 2 oraciones). "
             "Siempre responde en español y mantén el ritmo dinámico del fútbol."
         )
+
+        # Special system prompt for match start
+        self.start_match_prompt = (
+            "Eres un comentarista de fútbol profesional con estilo argentino como Mariano Closs. "
+            "Recibirás los metadatos de inicio de un partido de fútbol en formato JSON. "
+            "Tu tarea es hacer una PRESENTACIÓN EMOCIONANTE del partido que está por comenzar. "
+            "Incluye: saludo inicial, presentación de los equipos, estadio, competición, y algún dato relevante. "
+            "Genera una introducción CAUTIVANTE pero CONCISA (máximo 4-5 oraciones). "
+            "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
+            "Siempre responde en español."
+        )
+
+    def process_start_of_match(self, event: data_pb2.Event) -> str:
+        """Process the special start_of_match event with detailed introduction."""
+        # Convert the event data to JSON string for the LLM
+        event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
+        
+        user_msg = (
+            "Datos del partido que está por comenzar:\n\n"
+            f"{event_json}\n\n"
+            "Genera una presentación emocionante para el inicio de este partido de fútbol:"
+        )
+
+        # Call Azure OpenAI with special prompt
+        start = time.time()
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=[
+                    {"role": "system", "content": self.start_match_prompt},
+                    {"role": "user",   "content": user_msg},
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                top_p=self.top_p,
+            )
+            latency = time.time() - start
+
+            # Extract comment
+            comment = response.choices[0].message.content.strip()
+
+            # Log metrics
+            logger.info(
+                "[Module B] Processed start_of_match event in %.2f s (tokens: %s)",
+                latency,
+                getattr(response.usage, 'total_tokens', None)
+            )
+
+            return comment
+
+        except Exception as e:
+            logger.error(f"Error processing start_of_match event: {str(e)}")
+            return ""
 
     def process_batch(self, events: List[data_pb2.Event]) -> str:
         """Process a batch of events and return a cohesive commentary string."""
         if not events:
             return ""
 
-        # Sort events by timestamp if available, or by order received
-        # For now, we'll process them in the order received
-        
-        # Build the context from all events
-        event_descriptions = []
+        # Convert events to JSON strings instead of parsing them
+        events_json_list = []
         for event in events:
-            data = event.data
-            minuto = data.get("minuto", "?")
-            equipo = data.get("equipo", "?") 
-            jugador = data.get("jugador", "?")
-            accion = data.get("accion", "?")
-            
-            event_desc = f"Minuto {minuto}: {jugador} ({equipo}) - {accion}"
-            event_descriptions.append(event_desc)
+            event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
+            events_json_list.append(event_json)
 
-        # Create user message with all events
+        # Create user message with raw JSON events
         if len(events) == 1:
             user_msg = (
-                f"Evento del juego:\n{event_descriptions[0]}\n\n"
+                f"Evento del juego:\n\n{events_json_list[0]}\n\n"
                 "Genera un comentario dinámico sobre esta acción:"
             )
         else:
-            events_text = "\n".join(event_descriptions)
+            events_text = "\n\n---\n\n".join(events_json_list)
             user_msg = (
-                f"Secuencia de eventos del juego:\n{events_text}\n\n"
-                f"Genera un relato fluido que conecte estos {len(events)} eventos "
-                "y capture la emoción del momento:"
+                f"Secuencia de {len(events)} eventos del juego:\n\n{events_text}\n\n"
+                "Genera un relato fluido que conecte estos eventos y capture la emoción del momento:"
             )
 
         # Call Azure OpenAI

@@ -98,6 +98,7 @@ def auto_register_service(
         True if registration successful, False otherwise
     """
     try:
+        service_host = get_local_ip()
         result = register_service(
             service_name=service_name,
             service_host=service_host,  
@@ -187,9 +188,9 @@ def get_local_ip() -> str:
         str: The IP address to use for service registration
     """
     # Check for environment override
-    override_ip = get_env_var("SERVICE_HOST_IP", "localhost")
+    override_ip = get_env_var("SERVICE_HOST_IP", None)
     if override_ip:
-        logger.info(f"Using SERVICE_HOST_IP: {override_ip}")
+        logger.info(f"✍️ Overriding local_ip with env variable SERVICE_HOST_IP: {override_ip}")
         return override_ip
     
     # Basic IP detection using socket connection
@@ -198,12 +199,12 @@ def get_local_ip() -> str:
             # Connect to a remote address to determine our local IP
             s.connect(("8.8.8.8", 80))
             detected_ip = s.getsockname()[0]
-            logger.info(f"Auto-detected IP: {detected_ip}")
+            logger.info(f"🛜  Auto-detected IP: {detected_ip}")
             return detected_ip
+    
     except Exception as e:
         logger.warning(f"Failed to detect IP: {e}")
         logger.info("Falling back to localhost (services only accessible locally)")
         logger.info("💡 Set SERVICE_HOST_IP environment variable for reliable cross-machine communication")
         return "127.0.0.1"
-    
     
