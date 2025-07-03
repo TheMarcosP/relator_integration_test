@@ -381,8 +381,7 @@ def main() -> None:
     num_events = 0
     # Main loop --------------------------------------------------------------
     while True:
-        # evt = str(events[0])
-        json_str = json.dumps(events[num_events % len(events)], ensure_ascii=False)
+        json_str = json.dumps(events[num_events % len(events)], ensure_ascii=False) # Dummy events
 
         evt = data_pb2.Event(
             id   = str(uuid.uuid4()),
@@ -396,7 +395,7 @@ def main() -> None:
         except grpc.RpcError as exc:
             logging.error("❌ gRPC error to Module B: %s", exc)
         num_events += 1
-        time.sleep(3.0)  # 1 event per second
+        time.sleep(3.0)  # Only when using dummy events (for testing) 
 
 
 if __name__ == "__main__":

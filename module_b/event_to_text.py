@@ -15,7 +15,7 @@ class EventToText:
                  api_key: str = None,
                  endpoint: str = None,
                  deployment: str = None,
-                 max_tokens: int = 150,  # Increased for batch processing
+                 max_tokens: int = 50,  # Increased for batch processing
                  temperature: float = 0.7,
                  top_p: float = 0.9):
         # Load configuration from env if not provided
@@ -40,9 +40,9 @@ class EventToText:
         self.system_prompt = (
             "Eres un comentarista de fútbol EN TIEMPO REAL con estilo argentino como Mariano Closs. "
             "Recibirás eventos del juego en formato JSON. "
-            "Tu tarea es crear un relato FLUIDO y NATURAL que conecte estos eventos, "
-            "contando la historia de lo que está pasando en el partido. "
-            "Genera un comentario MUY CORTO pero EMOCIONANTE (máximo 2 oraciones). "
+            "Tu tarea es crear un pequeño relato FLUIDO y NATURAL que conecte estos eventos, "
+            "contando la brevemente de lo que está sucediendo en el partido. "
+            "Genera un comentario MUY MUY MUY CORTO pero EMOCIONANTE (máximo 1 oración). "
             "Siempre responde en español y mantén el ritmo dinámico del fútbol."
         )
 
@@ -52,7 +52,7 @@ class EventToText:
             "Recibirás los metadatos de inicio de un partido de fútbol en formato JSON. "
             "Tu tarea es hacer una PRESENTACIÓN EMOCIONANTE del partido que está por comenzar. "
             "Incluye: saludo inicial, presentación de los equipos, estadio, competición, y algún dato relevante. "
-            "Genera una introducción CAUTIVANTE pero CONCISA (máximo 4-5 oraciones). "
+            "Genera una introducción CAUTIVANTE pero MUY MUY MUY CORTA (máximo 2-3 oraciones). "
             "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
             "Siempre responde en español."
         )
@@ -149,11 +149,7 @@ class EventToText:
                 getattr(response.usage, 'total_tokens', None)
             )
             # Log prompt
-            logger.debug(
-                "[Module B] Prompt used: %s",
-                user_msg[:1000]  # Log first 1000 characters of the prompt
-            )
-
+            
             return comment
 
         except Exception as e:
