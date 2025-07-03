@@ -19,9 +19,9 @@ class EventToText:
                  temperature: float = 0.7,
                  top_p: float = 0.9):
         # Load configuration from env if not provided
-        self.api_key = api_key or os.getenv("AZURE_OPENAI_API_KEY")
-        self.endpoint = endpoint or os.getenv("AZURE_OPENAI_ENDPOINT")
-        self.deployment = deployment or os.getenv("AZURE_OPENAI_DEPLOYMENT")
+        self.api_key = api_key or os.getenv("API_KEY")
+        self.endpoint = endpoint or os.getenv("ENDPOINT")
+        self.deployment = deployment or os.getenv("DEPLOYMENT")
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.top_p = top_p
@@ -60,7 +60,7 @@ class EventToText:
     def process_start_of_match(self, event: data_pb2.Event) -> str:
         """Process the special start_of_match event with detailed introduction."""
         # Convert the event data to JSON string for the LLM
-        event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
+        event_json = json.loads(event.data)
         
         user_msg = (
             "Datos del partido que está por comenzar:\n\n"
@@ -107,8 +107,8 @@ class EventToText:
         # Convert events to JSON strings instead of parsing them
         events_json_list = []
         for event in events:
-            event_json = json.dumps(dict(event.data), indent=2, ensure_ascii=False)
-            events_json_list.append(event_json)
+            # event_json = json.loads(event.data)
+            events_json_list.append(event.data)
 
         # Create user message with raw JSON events
         if len(events) == 1:
@@ -147,6 +147,11 @@ class EventToText:
                 len(events),
                 latency,
                 getattr(response.usage, 'total_tokens', None)
+            )
+            # Log prompt
+            logger.debug(
+                "[Module B] Prompt used: %s",
+                user_msg[:1000]  # Log first 1000 characters of the prompt
             )
 
             return comment

@@ -20,6 +20,7 @@ import time
 import uuid
 
 import grpc
+import json
 
 # Local helpers / stubs -------------------------------------------------------
 from scripts.utils import get_env_var  # reloads .env each call
@@ -31,6 +32,80 @@ from google.protobuf.struct_pb2 import Struct
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "localhost:50052")
 
 
+events = [{
+    "event_id": 2,
+    "match_time": "01:17",
+    "type": "ball_possession_change",
+    "subtype": "different_team",
+    "current_team": "France",
+    "previous_team": "Argentina",
+    "current_player": {
+        "first_name": "Kylian",
+        "last_name": "Mbappe",
+        "nickname": "Kyky",
+        "number": 10,
+        "short_position": "LM",
+        "position": "Left Midfielder"
+    },
+    "previous_player": {
+        "first_name": "Nicolas",
+        "last_name": "Tagliafico",
+        "nickname": "Nico",
+        "number": 3,
+        "short_position": "LB",
+        "position": "Left Back"
+    },
+    "location": "center_middle"
+},
+{
+    "event_id": 3,
+    "match_time": "01:44",
+    "type": "ball_possession_change",
+    "subtype": "same_team",
+    "current_team": "France",
+    "previous_team": "France",
+    "current_player": {
+        "first_name": "Ousmane",
+        "last_name": "Dembele",
+        "nickname": "Dembouz",
+        "number": 11,
+        "short_position": "RM",
+        "position": "Right Midfielder"
+    },
+    "previous_player": {
+        "first_name": "Kylian",
+        "last_name": "Mbappe",
+        "nickname": "Kyky",
+        "number": 10,
+        "short_position": "LM",
+        "position": "Left Midfielder"
+    },
+    "location": "center_middle"
+},{
+    "event_id": 4,
+    "match_time": "02:46",
+    "type": "ball_possession_change",
+    "subtype": "different_team",
+    "current_team": "Argentina",
+    "previous_team": "France",
+    "current_player": {
+        "first_name": "Angel",
+        "last_name": "Di Maria",
+        "nickname": "Fideo",
+        "number": 11,
+        "short_position": "LM",
+        "position": "Left Midfielder"
+    },
+    "previous_player": {
+        "first_name": "Ousmane",
+        "last_name": "Dembele",
+        "nickname": "Dembouz",
+        "number": 11,
+        "short_position": "RM",
+        "position": "Right Midfielder"
+    },
+    "location": "right_bottom"
+}]
 
 # A small pool of plausible football actions for the dummy feed
 ACTIONS = [
@@ -81,8 +156,14 @@ def main() -> None:
     num_events = 0
     # Main loop --------------------------------------------------------------
     while True:
-        evt = build_event()
-        logging.info("⚽ Sending event %s » %s", evt.id, dict(evt.data))
+        # evt = str(events[0])
+        json_str = json.dumps(events[num_events % len(events)], ensure_ascii=False)
+
+        evt = data_pb2.Event(
+            id   = str(uuid.uuid4()),
+            data = json_str
+        )
+        logging.info("⚽ Sending event %s » %s", evt.id, evt.data)
         try:
             response = stub.ProcessEvent(evt)  # BasicResponse is ignored
             status = getattr(response, "status", "ok")
