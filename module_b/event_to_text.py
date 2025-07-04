@@ -5,10 +5,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 from openai import AzureOpenAI
-from proto import data_pb2  # type: ignore
+from proto import data_pb2
 from typing import List
 
+
 logger = logging.getLogger(__name__)
+
 
 class EventToText:
     """NLP processing: converts batches of events to game commentary"""
@@ -47,28 +49,178 @@ class EventToText:
         self.debug_dir.mkdir(exist_ok=True)
         self.call_counter = 0
 
-        # System prompt for batch processing
-        self.system_prompt = (
-            "Eres un comentarista de fútbol EN TIEMPO REAL con estilo argentino como Mariano Closs. "
-            "Recibirás eventos del juego en formato JSON. "
-            "Tu tarea es crear un pequeño relato FLUIDO y NATURAL que conecte estos eventos, "
-            "Genera un comentario MUY MUY MUY CORTO pero EMOCIONANTE de lo más importante que ocurrió en los ultimos eventos (máximo 1 oración breve). "
-            "Siempre responde en español y mantén el ritmo dinámico del fútbol. "
-            "Variar entre usar el last_name y el nickname del jugador."
-            "Cuando no ocurre nada, nombrar al jugador que tiene la pelota. Como por ejemplo: 'La tiene Messi', o simplemente 'Messi'." 
-            "No repetirse con los comentarios de eventos anteriores."
+        self.max_commentary_interval = 10.0
+        self.last_commentary_time = 0.0
+        self.events_queue = []
+
+        self.max_words = {
+            "default": 1, 
+            "inicio_del_partido": 30,  
+            "fin_del_partido": 30,  
+            "gol": 30, 
+            "disparo": 5,
+        }
+
+        # System prompts
+        time_interval = 1.0  # seconds
+        self.system_prompts = {
+            "default": (
+                "Sos Mariano Closs, un relator de fútbol profesional argentino conocido por su estilo apasionado y dinámico. "
+                "Recibirás eventos de partidos en formato JSON y tu tarea es generar un comentario breve y emocionante, "
+                "agrupando los eventos provistos en un relato fluido que priorice según la importancia de los acontecimientos "
+                f"del partido y la restricción de tiempo real. Por esta última razón, recibirás los eventos en lotes cada {time_interval} segundos. "
+                f"De este modo, recibirás una secuencia de eventos del juego producida durante los últimos {time_interval} segundos. "
+                f"Y deberás optar por generar un comentario de a lo sumo {time_interval} segundos de duración. Para ello, "
+                f"debes restringirte a una oración por llamada y a un límite de palabra de {2*time_interval} palabras. "
+                "Cuando simplemente cambia la posesión de la pelota, podés reducirte a nombrar al jugador que tiene la pelota, "
+                "como por ejemplo: 'La tiene Messi', o simplemente 'Messi'. "
+                "No repitas los comentarios de eventos anteriores. "
+                "Todos tus comentarios deben ser en español rioplatense, según el estilo de Mariano Closs. "
+                "Tu texto relatado luego será convertido a voz por un sintetizador de voz profesional (TTS). "
+                "Tenés que ser MUY MUY MUY breve y conciso, transmitiendo solo lo más importante de cada conjuntos de eventos. "
+            ),
+            "inicio_del_partido": (
+                "Sos Mariano Closs, un relator de fútbol profesional argentino conocido por su estilo apasionado y dinámico. "
+                "Recibirás los metadatos de inicio de un partido de fútbol en formato JSON. "
+                "Tu tarea es hacer una introducción EMOCIONANTE del partido que está por comenzar. "
+                "Incluye: saludo inicial, presentación de los equipos, estadio, competición, y algún dato relevante. "
+                "Genera una introducción CAUTIVANTE (máximo 5 oraciones de 20 segundos en total). "
+                "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
+                "Todos tus comentarios deben ser en español rioplatense, según el estilo de Mariano Closs. "
+                "Tu texto relatado luego será convertido a voz por un sintetizador de voz profesional (TTS). "
+            ),
+            "fin_del_partido": (
+                "Sos Mariano Closs, un relator de fútbol profesional argentino conocido por su estilo apasionado y dinámico. "
+                "Recibirás los metadatos de finalización de un partido de fútbol en formato JSON. "
+                "Tu tarea es hacer un cierre EMOCIONANTE del partido que acaba de finalizar. "
+                "Incluye: resumen del partido, resultado final, y algún dato relevante. "
+                "Genera un cierre CAUTIVANTE (máximo 5 oraciones de 20 segundos en total). "
+                "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
+                "Todos tus comentarios deben ser en español rioplatense, según el estilo de Mariano Closs. "
+                "Tu texto relatado luego será convertido a voz por un sintetizador de voz profesional (TTS). "
+            ),
+            "gol": (
+                "Sos Mariano Closs, un relator de fútbol profesional argentino conocido por su estilo apasionado y dinámico. "
+                "Recibirás un evento de gol en formato JSON. "
+                "Tu tarea es generar un comentario breve y emocionante sobre el gol, incluyendo: quién lo hizo, cómo fue la jugada, "
+                "y la reacción del público. "
+                "Genera un comentario CAUTIVANTE (máximo 3 oraciones de 10 segundos en total). "
+                "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
+                "Todos tus comentarios deben ser en español rioplatense, según el estilo de Mariano Closs. "
+                "Tu texto relatado luego será convertido a voz por un sintetizador de voz profesional (TTS). "
+            )
+        }
+
+    def get_user_prompt(self, events: List[dict], n_words: int):
+        events = [json.dumps(event, indent=4, ensure_ascii=False) for event in events]
+        events_text = "\n\n---\n\n".join(events)
+        return (
+            "Genera un relato resaltando los eventos más importantes en un comentario de "
+            "relator de fútbol profesional argentino. Es muy importante que el "
+            "relato sea fluido, emocionante y fácil de seguir para los oyentes en tiempo real."
+            f"El relato debe ser de no más de {n_words} palabras ({n_words*2} segundos), "
+            "y no debe repetir eventos anteriores. "
+            "Es muy importante que respetes la restricción del número de palabras ya que "
+            "el relato será convertido a voz por un sintetizador de voz profesional (TTS) "
+            "en tiempo real y atrasarse implicaría que se arruine la experiencia de los oyentes. "
+            "Si no lo respetás, serás castigado con la pena de muerte y no podrás relatar más partidos. "
+            "Si te pido que seas breve, tenés que ser breve. "
+            f"Secuencia de {len(events)} eventos del juego:\n\n{events_text}\n\n"
         )
 
-        # Special system prompt for match start
-        self.start_match_prompt = (
-            "Eres un comentarista de fútbol profesional con estilo argentino como Mariano Closs. "
-            "Recibirás los metadatos de inicio de un partido de fútbol en formato JSON. "
-            "Tu tarea es hacer una PRESENTACIÓN EMOCIONANTE del partido que está por comenzar. "
-            "Incluye: saludo inicial, presentación de los equipos, estadio, competición, y algún dato relevante. "
-            "Genera una introducción CAUTIVANTE pero MUY MUY MUY CORTA (máximo 2-3 oraciones). "
-            "Usa un tono profesional pero apasionado, típico del fútbol argentino. "
-            "Siempre responde en español."
-        )
+    def generate_commentary(self, event_type: str) -> str:
+        user_msg = self.get_user_prompt(self.events_queue, self.max_words.get(event_type, "default"))
+
+        # Call Azure OpenAI with conversation history
+        start = time.time()
+        try:
+            messages = self._build_messages(self.system_prompts.get(event_type, "default"), user_msg)
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                top_p=self.top_p,
+            )
+            latency = time.time() - start
+
+            # Extract comment
+            comment = response.choices[0].message.content.strip()
+
+            # Add to conversation history
+            self._add_to_conversation(user_msg, comment)
+
+            # Save debug information
+            self._save_debug_call(f"", messages, comment, latency)
+
+            # Generate dataset entry
+            dataset = self.gen_dataset(
+                messages,
+                comment,
+                json_path="dataset.json"
+            )
+
+            # Log metrics
+            logger.info(
+                "[Module B] Processed batch of %d events in %.2f s (tokens: %s)",
+                len(self.events_queue),
+                latency,
+                getattr(response.usage, 'total_tokens', None)
+            )
+            # Log prompt
+            logger.info(f'  Comment:\n{comment}')
+
+            self.events_queue.clear()
+            self.last_commentary_time = time.time()
+            return comment
+
+        except Exception as e:
+            logger.error(f"Error processing batch of {len(self.events_queue)} events: {str(e)}")
+
+            self.events_queue.clear()
+            return ""
+        
+    def process(self, event: data_pb2.Event) -> str:
+        event = json.loads(event.data)
+        self.events_queue.append(event)
+
+        if time.time() - self.last_commentary_time > self.max_commentary_interval or \
+            event["type"] in ["inicio_del_partido",
+                             "fin_del_partido",
+                             "gol",
+                             "disparo",
+                             "pelota_parada",
+                             "pase"]:
+            return self.generate_commentary(event["type"])
+        return ""
+    
+    def gen_dataset(self, messages: List[dict], response: str, json_path: str) -> None:
+        """
+        Generate a dataset entry from messages and response.
+        It saves a JSON object with the following structure:
+        {
+            "input": "System prompt + all user messages",
+            "output": "LLM response"
+        }
+        """
+        # 1) System prompt
+        system_msgs = [m["content"] for m in messages if m["role"] == "system"]
+        system_text = system_msgs[0].strip() if system_msgs else ""
+
+        # 2) User prompts
+        user_texts = [m["content"].strip() for m in messages if m["role"] == "user"]
+        all_user_text = "\n".join(user_texts)
+
+        input_text = system_text + "\n\n" + all_user_text
+
+        dataset_entry = {
+            "input": input_text,
+            "output": response.strip()
+        }
+
+        with open(json_path, "a", encoding="utf-8") as f:
+            json.dump(dataset_entry, f, ensure_ascii=False, indent=4)
+            f.write("\n")
 
     def _add_to_conversation(self, user_message: str, assistant_message: str):
         """Add a user-assistant exchange to conversation history."""
@@ -177,114 +329,3 @@ class EventToText:
             
         except Exception as e:
             return {"error": f"Failed to format content: {e}", "raw_content": content}
-
-    def process_start_of_match(self, event: data_pb2.Event) -> str:
-        """Process the special start_of_match event with detailed introduction."""
-        # Convert the event data to JSON string for the LLM
-        event_json = json.loads(event.data)
-        
-        user_msg = (
-            "Datos del partido que está por comenzar:\n\n"
-            f"{event_json}\n\n"
-            "Genera una presentación emocionante para el inicio de este partido de fútbol:"
-        )
-
-        # Call Azure OpenAI with special prompt and conversation history
-        start = time.time()
-        try:
-            messages = self._build_messages(self.start_match_prompt, user_msg)
-            response = self.client.chat.completions.create(
-                model=self.deployment,
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                top_p=self.top_p,
-            )
-            latency = time.time() - start
-
-            # Extract comment
-            comment = response.choices[0].message.content.strip()
-
-            # Add to conversation history
-            self._add_to_conversation(user_msg, comment)
-
-            # Save debug information
-            self._save_debug_call("start_match", messages, comment, latency)
-
-            # Log metrics
-            logger.info(
-                "[Module B] Processed start_of_match event in %.2f s (tokens: %s)",
-                latency,
-                getattr(response.usage, 'total_tokens', None)
-            )
-
-            return comment
-
-        except Exception as e:
-            logger.error(f"Error processing start_of_match event: {str(e)}")
-            return ""
-
-    def process_batch(self, events: List[data_pb2.Event]) -> str:
-        """Process a batch of events and return a cohesive commentary string."""
-        if not events:
-            return ""
-
-        # Convert events to JSON strings instead of parsing them
-        events_json_list = []
-        for event in events:
-            # event_json = json.loads(event.data)
-            events_json_list.append(event.data)
-
-        # Create user message with raw JSON events
-        if len(events) == 1:
-            user_msg = (
-                f"Evento del juego:\n\n{events_json_list[0]}\n\n"
-                # "Genera un comentario dinámico sobre esta acción"
-            )
-        else:
-            events_text = "\n\n---\n\n".join(events_json_list)
-            user_msg = (
-                f"Secuencia de {len(events)} eventos del juego:\n\n{events_text}\n\n"
-                # f"Comenta uno de los siguientes {len(events)} eventos del juego (máximo 10 palabras):\n\n{events_text}\n\n"
-            )
-
-        # Call Azure OpenAI with conversation history
-        start = time.time()
-        try:
-            messages = self._build_messages(self.system_prompt, user_msg)
-            response = self.client.chat.completions.create(
-                model=self.deployment,
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                top_p=self.top_p,
-            )
-            latency = time.time() - start
-
-            # Extract comment
-            comment = response.choices[0].message.content.strip()
-
-            # Add to conversation history
-            self._add_to_conversation(user_msg, comment)
-
-            # Save debug information
-            self._save_debug_call(f"", messages, comment, latency)
-
-            # Log metrics
-            logger.info(
-                "[Module B] Processed batch of %d events in %.2f s (tokens: %s)",
-                len(events),
-                latency,
-                getattr(response.usage, 'total_tokens', None)
-            )
-            # Log prompt
-            logger.info(f'  Comment:\n{comment}')
-            return comment
-
-        except Exception as e:
-            logger.error(f"Error processing batch of {len(events)} events: {str(e)}")
-            return ""
-
-    def process(self, event: data_pb2.Event) -> str:
-        """Legacy method - process single event (kept for compatibility)."""
-        return self.process_batch([event])
