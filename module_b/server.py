@@ -12,13 +12,11 @@ from proto import data_pb2, data_pb2_grpc
 # from module_b.dummy_event_to_text import EventToText
 from module_b.event_to_text import EventToText
 
-
 # Service configuration
 logging.basicConfig(level=logging.INFO, format="[Module B] %(asctime)s - %(levelname)s - %(message)s")
 SERVICE_NAME = "module_b"
 MODULE_B_HOST = get_env_var("MODULE_B_HOST", "0.0.0.0:50052")
 MODULE_C_HOST = get_env_var("MODULE_C_HOST") or get_service_endpoint_from_discovery("module_c")
-
 
 class ModuleBServicer(data_pb2_grpc.ModuleBServicer):
     """Receives events from Module A and forwards text to Module C."""

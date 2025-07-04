@@ -7,6 +7,7 @@ from pathlib import Path
 from openai import AzureOpenAI
 from proto import data_pb2
 from typing import List
+from openai import OpenAI
 
 
 logger = logging.getLogger(__name__)
@@ -33,12 +34,20 @@ class EventToText:
         if not all([self.api_key, self.endpoint, self.deployment]):
             raise ValueError("Azure OpenAI API key, endpoint, and deployment must be set")
 
-        # Initialize Azure OpenAI client
-        self.client = AzureOpenAI(
-            api_key=self.api_key,
-            azure_endpoint=self.endpoint,
-            api_version="2024-12-01-preview"
-        )
+        # If the endpoint contains localhost, use OpenAI client
+        if "localhost" in self.endpoint:
+            logger.info("Using OpenAI client for local development")
+            self.client = OpenAI(
+                api_key=self.api_key,
+                base_url=self.endpoint,
+            )
+        else:
+            logger.info("Using Azure OpenAI client")
+            self.client = AzureOpenAI(
+                api_key=self.api_key,
+                azure_endpoint=self.endpoint,
+                api_version="2024-12-01-preview"
+            )
 
         # Conversation history - keep last 5 exchanges (10 messages)
         self.conversation_history = []
