@@ -23,9 +23,15 @@ class OrderedAudioPlayer:
         self._not_empty = threading.Condition(self._lock)
         self._shutdown = False
         
-        # Single thread executor to guarantee sequential playback
+        # Single thread executor to guarantee sequential playbook
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._worker_future = self._executor.submit(self._worker)
+        
+        # Ambient sound playback
+        self._ambient_sound_path = os.path.join(os.path.dirname(__file__), "ambient_sound.wav")
+        self._ambient_process = None
+        self._ambient_thread = None
+        self._start_ambient_sound()
         
         logger.info("✅ OrderedAudioPlayer initialized (PipeWire mode)")
 
@@ -58,6 +64,9 @@ class OrderedAudioPlayer:
         """Gracefully shutdown the player"""
         logger.info("🛑 Shutting down OrderedAudioPlayer...")
         self._shutdown = True
+        
+        # Stop ambient sound first
+        self._stop_ambient_sound()
         
         with self._not_empty:
             self._not_empty.notify_all()
@@ -122,7 +131,7 @@ class OrderedAudioPlayer:
 
             # Play with pw-play
             result = subprocess.run(
-                ["pw-play", "--volume=0.7", temp_file],
+                ["pw-play", "--volume=6.0", temp_file],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
@@ -169,7 +178,7 @@ class OrderedAudioPlayer:
 
             # Try paplay as fallback
             result = subprocess.run(
-                ["paplay", "--volume=32768", temp_file],
+                ["paplay", "--volume=100000", temp_file],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
@@ -190,3 +199,90 @@ class OrderedAudioPlayer:
                     os.unlink(temp_file)
                 except:
                     pass
+
+    def _start_ambient_sound(self):
+        """Start continuous ambient sound playback in a separate thread"""
+        if not os.path.exists(self._ambient_sound_path):
+            logger.warning(f"❌ Ambient sound file not found: {self._ambient_sound_path}")
+            return
+        
+        logger.info(f"🎶 Starting ambient sound: {self._ambient_sound_path}")
+        self._ambient_thread = threading.Thread(target=self._ambient_sound_worker, daemon=True)
+        self._ambient_thread.start()
+    
+    def _stop_ambient_sound(self):
+        """Stop ambient sound playback"""
+        if self._ambient_process:
+            try:
+                self._ambient_process.terminate()
+                self._ambient_process.wait(timeout=3.0)
+                logger.info("🔇 Ambient sound stopped")
+            except subprocess.TimeoutExpired:
+                logger.warning("🔇 Ambient sound process killed (timeout)")
+                self._ambient_process.kill()
+            except Exception as e:
+                logger.error(f"❌ Error stopping ambient sound: {e}")
+            finally:
+                self._ambient_process = None
+    
+    def _ambient_sound_worker(self):
+        """Worker thread for continuous ambient sound playback"""
+        logger.info("🎶 Ambient sound worker thread started")
+        
+        while not self._shutdown:
+            try:
+                # Start ambient sound process with loop and lower volume
+                self._ambient_process = subprocess.Popen(
+                    ["pw-play", "--volume=0.3", self._ambient_sound_path],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE
+                )
+                
+                # Wait for process to finish or shutdown signal
+                while not self._shutdown and self._ambient_process.poll() is None:
+                    time.sleep(0.1)
+                
+                if self._shutdown:
+                    break
+                    
+                # If process ended naturally, restart it (continuous loop)
+                if self._ambient_process.poll() is not None:
+                    logger.debug("🔄 Restarting ambient sound")
+                    
+            except FileNotFoundError:
+                logger.error("❌ pw-play not found for ambient sound - trying fallback")
+                self._ambient_sound_fallback()
+                break
+                
+            except Exception as e:
+                logger.error(f"❌ Ambient sound error: {e}")
+                time.sleep(1.0)  # Wait before retry
+                
+        logger.info("🎶 Ambient sound worker thread stopped")
+    
+    def _ambient_sound_fallback(self):
+        """Fallback ambient sound using paplay"""
+        logger.info("🎶 Using paplay fallback for ambient sound")
+        
+        while not self._shutdown:
+            try:
+                self._ambient_process = subprocess.Popen(
+                    ["paplay", "--volume=16384", self._ambient_sound_path],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE
+                )
+                
+                # Wait for process to finish or shutdown signal
+                while not self._shutdown and self._ambient_process.poll() is None:
+                    time.sleep(0.1)
+                
+                if self._shutdown:
+                    break
+                    
+                # If process ended naturally, restart it (continuous loop)
+                if self._ambient_process.poll() is not None:
+                    logger.debug("🔄 Restarting ambient sound (fallback)")
+                    
+            except Exception as e:
+                logger.error(f"❌ Ambient sound fallback error: {e}")
+                time.sleep(1.0)  # Wait before retry
