@@ -8,6 +8,7 @@ from openai import AzureOpenAI
 from proto import data_pb2
 from typing import List
 from openai import OpenAI
+import re
 
 
 logger = logging.getLogger(__name__)
@@ -205,35 +206,52 @@ class EventToText:
     
     def gen_dataset(self, messages: List[dict], response: str, json_path: str) -> None:
         """
-        Generate a dataset entry from messages and response.
-        It saves a JSON object with the following structure:
+        Generate a dataset entry from messages and response and append it into a JSON array file.
+
+        Each entry has the structure:
         {
             "input": "System prompt + all user messages",
             "output": "LLM response"
         }
+
+        The JSON file at `json_path` will be maintained as a list of such entries.
+        Leading occurrences of 'default\n' in the combined input are removed.
         """
-        # 1) System prompt
-        system_msgs = [m["content"] for m in messages if m["role"] == "system"]
+        # 1) Extract and clean system prompt
+        system_msgs = [m["content"] for m in messages if m.get("role") == "system"]
         system_text = system_msgs[0].strip() if system_msgs else ""
 
-        # 2) User prompts
-        user_texts = [m["content"].strip() for m in messages if m["role"] == "user"]
+        # 2) Extract user messages
+        user_texts = [m["content"].strip() for m in messages if m.get("role") == "user"]
         all_user_text = "\n".join(user_texts)
 
-        input_text = system_text + "\n\n" + all_user_text
+        # Combine, then strip unwanted default prefixes
+        input_text = f"{system_text}\n\n{all_user_text}".strip()
+        # Remove any leading 'default' lines
+        input_text = re.sub(r"^default\s*\n+", "", input_text)
 
-        dataset_entry = {
+        entry = {
             "input": input_text,
             "output": response.strip()
         }
 
-        with open(json_path, "a", encoding="utf-8") as f:
-            json.dump(dataset_entry, f, ensure_ascii=False, indent=4)
-            f.write("\n")
+        # Load existing entries if any
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                entries = json.load(f)
+                if not isinstance(entries, list):
+                    entries = []
+        except (FileNotFoundError, json.JSONDecodeError):
+            entries = []
+
+        # Append and write back
+        entries.append(entry)
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(entries, f, ensure_ascii=False, indent=4)
 
     def _add_to_conversation(self, user_message: str, assistant_message: str):
         """Add a user-assistant exchange to conversation history."""
-        self.conversation_history.append({"role": "user", "content": user_message})
+        # self.conversation_history.append({"role": "user", "content": user_message})
         self.conversation_history.append({"role": "assistant", "content": assistant_message})
         
         # Keep only last N exchanges (N*2 messages)
