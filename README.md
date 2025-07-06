@@ -1,6 +1,67 @@
-# Multi-Module gRPC Pipeline with Service Discovery (A → B → C → D)
+# ⚽ AI Football Commentator
 
-This repository contains a **end-to-end gRPC example** that streams dummy events through four micro-services with automated service discovery.
+A distributed system for real-time football match commentary generation using natural language processing.
+
+## Overview
+
+This project is a **proof of concept** for generating live football commentary without human intervention. It leverages structured match data from a simulation environment, converts it into natural language using AI models, and synthesizes realistic voice narration, mimicking the tone and emotion of professional commentators.
+
+> ⚠️ Real video-based event detection is out of scope for this version. We use **Google Research Football** to simulate matches and extract precise event data.
+
+
+(video o link a un video de demo)
+
+## 🛠️ Architecture
+
+The system is modular and can be distributed across multiple machines:
+
+### 📍 1. Event Extractor
+
+* Simulates a football match using **Google Research Football**.
+* Extracts relevant events from the simulation raw data.
+* Emits structured events asynchronously via `gRPC`.
+
+### ✍️ 2. Event-to-Text Generator
+
+* Receives structured events and generates natural-language descriptions.
+* Used OpenAI's GPT-4o model to first generate a synthetic dataset of event-commentary pairs.
+* Then fine-tuned a small model to match the accuracy of the GPT-4o model and be able to run locally in real-time.
+* Mimics the narrative style of well-known Spanish football commentators.
+
+### 🔊 3. Text-to-Speech (TTS)
+
+* Converts text into expressive voice using [xTTS-v2 (Coqui TTS)](https://github.com/coqui-ai/TTS), fined-tuned on a dataset of short audio clips from Argentinian football commentators.
+* Outputs audio that matches the excitement and rhythm of live match broadcasts.
+
+## 🌐 Communication
+
+* Modules run independently and communicate over LAN using **gRPC**.
+* Low-latency performance: \~2 seconds from event trigger to audio playback.
+
+
+
+
+
+## 🚀 Getting Started
+
+> Setup instructions coming soon.
+
+<!-- tendria que ser algo como usar un requirements.txt general y dps por modulo otro requirements.txt ? -->
+
+### Module A
+
+### Module B
+
+### Module C
+
+### Module D
+
+
+
+
+<!-- (esto esta viejo pero sirve de referencia) -->
+
+### Multi-Module gRPC Pipeline with Service Discovery (A → B → C → D)
 
 ```
 Module A  →  Module B  →  Module C  →  Module D
@@ -9,11 +70,7 @@ Module A  →  Module B  →  Module C  →  Module D
 
 Each service is placed in its own folder (`module_a/ … module_d/`) and communicates with the next service using the messages and services defined in `proto/data.proto`.
 
-Each request/response carries a globally‐unique `id` field so you can trace a single event throughout the whole pipeline.
-
-Module D plays the `.wav` bytes using the `simpleaudio` library. Ensure your system audio works, and install optional dependencies via `pip install simpleaudio`.
-
-## 🆕 Service Discovery
+### 🆕 Service Discovery
 
 The system includes a **FastAPI-based service discovery service** that eliminates the need for manual endpoint configuration. Services can:
 - **Auto-register** themselves when they start
@@ -71,10 +128,10 @@ The system includes a **FastAPI-based service discovery service** that eliminate
 In the env file set `MODULE_B_HOST`, `MODULE_C_HOST`, `MODULE_D_HOST` to the address of the machine you are running each service on.
 
 
----
-## 2. Service Discovery System
 
-### How it Works
+### 2. Service Discovery System
+
+#### How it Works
 
 The discovery service acts as an **online dictionary** where:
 - Services **register** themselves: `POST /register` with `{name, host, port, metadata}`
@@ -98,13 +155,6 @@ The discovery server uses **Bearer token authentication** with API keys to preve
 - **All other endpoints** require a valid API key in the `Authorization` header
 - API keys are configured via the `DISCOVERY_API_KEY` environment variable
 - Include the API key as: `Authorization: Bearer your-api-key-here`
-
-**Security Benefits:**
-- Prevents spam and unauthorized service registrations
-- Protects against malicious service discovery attempts  
-- Secures service unregistration from unauthorized users
-- Allows monitoring of legitimate vs unauthorized access attempts
-
 
 
 ### CLI Tool
@@ -157,111 +207,3 @@ VERBOSE=true                    # Enable detailed debug logs (default: false)
 
 During local development you can place these keys in a `.env` file (they are loaded on every access via `scripts.utils.get_env_var`).
 
-### Deployment Scenarios
-
-**Single Machine (Development):**
-```bash
-# All services on localhost, discovery on localhost:8000
-DISCOVERY_HOST=localhost
-```
-
-**Multiple Machines (Same LAN):**
-```bash
-# Discovery server on main machine
-DISCOVERY_HOST=192.168.1.100
-# Services auto-detect their own IPs and register
-```
-
-**Different Networks:**
-```bash
-# Discovery server on publicly accessible host
-DISCOVERY_HOST=your-discovery-server.com
-# Services register with their public/accessible IPs
-```
-
-### IP Configuration
-
-The system uses a smart approach for IP configuration:
-
-1. **Environment Override**: Set `SERVICE_HOST_IP` for explicit control
-2. **Auto-detection**: Basic socket-based IP detection
-3. **Localhost Fallback**: Uses `127.0.0.1` if detection fails
-
-**For most scenarios**, auto-detection works fine. **Override when needed**:
-
-```bash
-# WSL users - when auto-detection gives 172.x.x.x IP
-SERVICE_HOST_IP=192.168.1.100
-
-# Multi-network machines - when auto-detection picks wrong interface
-SERVICE_HOST_IP=192.168.1.50
-
-# Production - for explicit control
-SERVICE_HOST_IP=10.0.1.100
-```
-
-**Benefits of this approach:**
-- ✅ **Works out-of-the-box**: Most users don't need to configure anything
-- ✅ **Override when needed**: Set `SERVICE_HOST_IP` for special cases
-- ✅ **Clear logging**: Shows which IP was chosen and why
-
----
-### 🔒 Making Your WSL Server Accessible from Windows
-
-To allow your gRPC server running inside WSL to be accessed from Windows, follow these two main steps:
-
----
-
-#### 1. Allow Inbound Firewall Connections
-
-Open PowerShell **as Administrator** and run:
-
-```powershell
-New-NetFirewallRule -DisplayName "Allow WSL Server" -Direction Inbound -LocalPort 50052,50053,50054 -Protocol TCP -Action Allow
-```
-
-This creates a firewall rule allowing inbound TCP connections on the specified ports.
-
----
-
-#### 2. Set Up Port Forwarding (portproxy)
-
-Windows needs to forward traffic to the WSL IP. Do the following:
-
-1. In WSL, get your WSL IP:
-
-   ```bash
-   ip addr show eth0
-   ```
-
-   Look for the IP address (usually in the `inet` field).
-
-2. In PowerShell (as Administrator), run:
-
-   ```powershell
-   netsh interface portproxy add v4tov4 listenport=50051 listenaddress=0.0.0.0 connectport=50051 connectaddress=<WSL_IP>
-   ```
-
-   Replace `<WSL_IP>` with the IP you got from WSL.
-   For example:
-
-   ```powershell
-   netsh interface portproxy add v4tov4 listenport=50052 listenaddress=0.0.0.0 connectport=50052 connectaddress=172.30.66.160
-   ```
-
-    Restart PC after setting up the port forwarding to ensure it takes effect.
----
-
-You can check existing rules with:
-
-```powershell
-netsh interface portproxy show all
-```
-
-To delete a rule:
-
-```powershell
-netsh interface portproxy delete v4tov4 listenport=<PORT> listenaddress=0.0.0.0
-```
-
----
